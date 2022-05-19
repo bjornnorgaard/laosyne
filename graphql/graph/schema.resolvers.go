@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bjornnorgaard/laosyne/api/graphql/graph/generated"
-	"github.com/bjornnorgaard/laosyne/api/graphql/graph/model"
+	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
+	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 )
 
 func (r *mutationResolver) AddMediaPath(ctx context.Context, input model.NewMediaPath) (*model.MediaPath, error) {
