@@ -3,5 +3,5 @@ packages:
   - path: "database"
     name: "database"
     engine: "postgresql"
-    schema: "schema.sql"
+    schema: "./migrations"
     queries: "query.sql"

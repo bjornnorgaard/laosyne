@@ -1,6 +1,6 @@
-CREATE TABLE pictures
+CREATE TABLE IF NOT EXISTS pictures
 (
-    id        UUID PRIMARY KEY,
+    id        BIGSERIAL PRIMARY KEY,
     path      TEXT      NOT NULL,
     ext       TEXT      NOT NULL,
     views     INT       NOT NULL,
@@ -13,9 +13,9 @@ CREATE TABLE pictures
     updated   TIMESTAMP NOT NULL
 );
 
-CREATE TABLE media_paths
+CREATE TABLE IF NOT EXISTS media_paths
 (
-    id      UUID PRIMARY KEY,
+    id      BIGSERIAL PRIMARY KEY,
     path    TEXT      NOT NULL,
     created TIMESTAMP NOT NULL,
     updated TIMESTAMP NOT NULL

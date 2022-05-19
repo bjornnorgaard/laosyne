@@ -5,7 +5,7 @@ import (
 
 	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
-	"github.com/bjornnorgaard/laosyne/postgres/database"
+	"github.com/bjornnorgaard/laosyne/repository/database"
 	"github.com/cockroachdb/errors"
 )
 
@@ -28,7 +28,7 @@ func NewApi(database database.Queries) *Api {
 func (a Api) AddMediaPath(ctx context.Context, input model.NewMediaPath) (*model.MediaPath, error) {
 	created, err := a.db.CreateMediaPath(ctx, input.Path)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create media path")
+		return nil, errors.Wrap(err, "failed to create path")
 	}
 
 	dto := &model.MediaPath{

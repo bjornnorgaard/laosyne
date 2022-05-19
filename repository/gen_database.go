@@ -1,7 +1,7 @@
 //go:build postgres
 // +build postgres
 
-package postgres
+package repository
 
 import (
 	_ "github.com/kyleconroy/sqlc/cmd/sqlc"
