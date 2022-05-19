@@ -1,6 +1,6 @@
 type Query {
-    Paths: [Path!]!
-    Picture(filter: String!): Picture!
+    GetPaths: [Path!]!
+    GetPicture(filter: String!): Picture!
 }
 
 type Mutation {

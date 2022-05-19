@@ -23,11 +23,11 @@ func (r *mutationResolver) ScanPath(ctx context.Context) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Paths(ctx context.Context) ([]*model.Path, error) {
+func (r *queryResolver) GetPaths(ctx context.Context) ([]*model.Path, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) Picture(ctx context.Context, filter string) (*model.Picture, error) {
+func (r *queryResolver) GetPicture(ctx context.Context, filter string) (*model.Picture, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -46,6 +46,12 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) Paths(ctx context.Context) ([]*model.Path, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *queryResolver) Picture(ctx context.Context, filter string) (*model.Picture, error) {
+	panic(fmt.Errorf("not implemented"))
+}
 func (r *queryResolver) Pictures(ctx context.Context) ([]*model.Picture, error) {
 	panic(fmt.Errorf("not implemented"))
 }

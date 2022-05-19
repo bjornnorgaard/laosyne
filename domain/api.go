@@ -18,7 +18,7 @@ type Api struct {
 	db database.Queries
 }
 
-func (a Api) Picture(ctx context.Context, filter string) (*model.Picture, error) {
+func (a Api) GetPicture(ctx context.Context, filter string) (*model.Picture, error) {
 	pictures, err := a.db.GetPicturesByFilter(ctx, database.GetPicturesByFilterParams{
 		Column1: filter,
 		Limit:   1,
@@ -66,7 +66,7 @@ func (a Api) AddPath(ctx context.Context, input model.NewPath) (*model.Path, err
 	return dto, nil
 }
 
-func (a Api) Paths(ctx context.Context) ([]*model.Path, error) {
+func (a Api) GetPaths(ctx context.Context) ([]*model.Path, error) {
 	mediaPaths, err := a.db.GetPaths(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get media paths")
