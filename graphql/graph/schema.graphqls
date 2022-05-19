@@ -1,17 +1,21 @@
 type Query {
-  MediaPaths: [MediaPath!]!
+    Paths: [Path!]!
 }
 
 type Mutation {
-  AddMediaPath(input: NewMediaPath!): MediaPath!
+    AddPath(input: NewPath!): Path!
+    DeletePath(input: DeletePath!): Boolean!
 }
 
-type MediaPath {
-  id: ID!
-  path: String!
+type Path {
+    id: Int!
+    path: String!
 }
 
-input NewMediaPath {
-  path: String!
+input NewPath {
+    path: String!
 }
 
+input DeletePath {
+    pathId: Int!
+}

@@ -11,11 +11,15 @@ import (
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 )
 
-func (r *mutationResolver) AddMediaPath(ctx context.Context, input model.NewMediaPath) (*model.MediaPath, error) {
+func (r *mutationResolver) AddPath(ctx context.Context, input model.NewPath) (*model.Path, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) MediaPaths(ctx context.Context) ([]*model.MediaPath, error) {
+func (r *mutationResolver) DeletePath(ctx context.Context, input model.DeletePath) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *queryResolver) Paths(ctx context.Context) ([]*model.Path, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

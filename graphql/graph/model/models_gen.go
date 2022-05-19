@@ -2,11 +2,15 @@
 
 package model
 
-type MediaPath struct {
-	ID   string `json:"id"`
+type DeletePath struct {
+	PathID int `json:"pathId"`
+}
+
+type NewPath struct {
 	Path string `json:"path"`
 }
 
-type NewMediaPath struct {
+type Path struct {
+	ID   int    `json:"id"`
 	Path string `json:"path"`
 }

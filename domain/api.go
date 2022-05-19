@@ -25,33 +25,42 @@ func NewApi(database database.Queries) *Api {
 	return &Api{db: database}
 }
 
-func (a Api) AddMediaPath(ctx context.Context, input model.NewMediaPath) (*model.MediaPath, error) {
-	created, err := a.db.CreateMediaPath(ctx, input.Path)
+func (a Api) AddPath(ctx context.Context, input model.NewPath) (*model.Path, error) {
+	created, err := a.db.CreatePath(ctx, input.Path)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create path")
 	}
 
-	dto := &model.MediaPath{
-		ID:   created.ID.String(),
+	dto := &model.Path{
+		ID:   int(created.ID),
 		Path: created.Path,
 	}
 
 	return dto, nil
 }
 
-func (a Api) MediaPaths(ctx context.Context) ([]*model.MediaPath, error) {
-	mediaPaths, err := a.db.GetMediaPaths(ctx)
+func (a Api) Paths(ctx context.Context) ([]*model.Path, error) {
+	mediaPaths, err := a.db.GetPaths(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get media paths")
 	}
 
-	var dto []*model.MediaPath
+	var dto []*model.Path
 	for _, mp := range mediaPaths {
-		dto = append(dto, &model.MediaPath{
-			ID:   mp.ID.String(),
+		dto = append(dto, &model.Path{
+			ID:   int(mp.ID),
 			Path: mp.Path,
 		})
 	}
 
 	return dto, nil
+}
+
+func (a Api) DeletePath(ctx context.Context, input model.DeletePath) (bool, error) {
+
+	err := a.db.DeletePath(ctx, int64(input.PathID))
+	if err != nil {
+		return false, errors.Wrap(err, "failed to delete path")
+	}
+	return true, nil
 }

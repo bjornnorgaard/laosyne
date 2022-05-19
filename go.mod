@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/99designs/gqlgen v0.17.5
 	github.com/cockroachdb/errors v1.9.0
-	github.com/google/uuid v1.3.0
+	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/kyleconroy/sqlc v1.13.0
 	github.com/lib/pq v1.10.6
 	github.com/vektah/gqlparser/v2 v2.4.2
@@ -20,7 +20,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/getsentry/sentry-go v0.12.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-migrate/migrate/v4 v4.15.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

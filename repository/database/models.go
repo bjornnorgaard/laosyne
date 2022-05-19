@@ -6,19 +6,17 @@ package database
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
-type MediaPath struct {
-	ID      uuid.UUID
+type Path struct {
+	ID      int64
 	Path    string
 	Created time.Time
 	Updated time.Time
 }
 
 type Picture struct {
-	ID        uuid.UUID
+	ID        int64
 	Path      string
 	Ext       string
 	Views     int32

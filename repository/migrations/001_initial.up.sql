@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS pictures
     updated   TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS media_paths
+CREATE TABLE IF NOT EXISTS paths
 (
     id      BIGSERIAL PRIMARY KEY,
     path    TEXT      NOT NULL,

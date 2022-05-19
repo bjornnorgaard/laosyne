@@ -44,25 +44,27 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	MediaPath struct {
+	Mutation struct {
+		AddPath    func(childComplexity int, input model.NewPath) int
+		DeletePath func(childComplexity int, input model.DeletePath) int
+	}
+
+	Path struct {
 		ID   func(childComplexity int) int
 		Path func(childComplexity int) int
 	}
 
-	Mutation struct {
-		AddMediaPath func(childComplexity int, input model.NewMediaPath) int
-	}
-
 	Query struct {
-		MediaPaths func(childComplexity int) int
+		Paths func(childComplexity int) int
 	}
 }
 
 type MutationResolver interface {
-	AddMediaPath(ctx context.Context, input model.NewMediaPath) (*model.MediaPath, error)
+	AddPath(ctx context.Context, input model.NewPath) (*model.Path, error)
+	DeletePath(ctx context.Context, input model.DeletePath) (bool, error)
 }
 type QueryResolver interface {
-	MediaPaths(ctx context.Context) ([]*model.MediaPath, error)
+	Paths(ctx context.Context) ([]*model.Path, error)
 }
 
 type executableSchema struct {
@@ -80,38 +82,50 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "MediaPath.id":
-		if e.complexity.MediaPath.ID == nil {
+	case "Mutation.AddPath":
+		if e.complexity.Mutation.AddPath == nil {
 			break
 		}
 
-		return e.complexity.MediaPath.ID(childComplexity), true
-
-	case "MediaPath.path":
-		if e.complexity.MediaPath.Path == nil {
-			break
-		}
-
-		return e.complexity.MediaPath.Path(childComplexity), true
-
-	case "Mutation.AddMediaPath":
-		if e.complexity.Mutation.AddMediaPath == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_AddMediaPath_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_AddPath_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddMediaPath(childComplexity, args["input"].(model.NewMediaPath)), true
+		return e.complexity.Mutation.AddPath(childComplexity, args["input"].(model.NewPath)), true
 
-	case "Query.MediaPaths":
-		if e.complexity.Query.MediaPaths == nil {
+	case "Mutation.DeletePath":
+		if e.complexity.Mutation.DeletePath == nil {
 			break
 		}
 
-		return e.complexity.Query.MediaPaths(childComplexity), true
+		args, err := ec.field_Mutation_DeletePath_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePath(childComplexity, args["input"].(model.DeletePath)), true
+
+	case "Path.id":
+		if e.complexity.Path.ID == nil {
+			break
+		}
+
+		return e.complexity.Path.ID(childComplexity), true
+
+	case "Path.path":
+		if e.complexity.Path.Path == nil {
+			break
+		}
+
+		return e.complexity.Path.Path(childComplexity), true
+
+	case "Query.Paths":
+		if e.complexity.Query.Paths == nil {
+			break
+		}
+
+		return e.complexity.Query.Paths(childComplexity), true
 
 	}
 	return 0, false
@@ -121,7 +135,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputNewMediaPath,
+		ec.unmarshalInputDeletePath,
+		ec.unmarshalInputNewPath,
 	)
 	first := true
 
@@ -183,23 +198,26 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `type Query {
-  MediaPaths: [MediaPath!]!
+    Paths: [Path!]!
 }
 
 type Mutation {
-  AddMediaPath(input: NewMediaPath!): MediaPath!
+    AddPath(input: NewPath!): Path!
+    DeletePath(input: DeletePath!): Boolean!
 }
 
-type MediaPath {
-  id: ID!
-  path: String!
+type Path {
+    id: Int!
+    path: String!
 }
 
-input NewMediaPath {
-  path: String!
+input NewPath {
+    path: String!
 }
 
-`, BuiltIn: false},
+input DeletePath {
+    pathId: Int!
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -207,13 +225,28 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_AddMediaPath_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_AddPath_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewMediaPath
+	var arg0 model.NewPath
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewMediaPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐNewMediaPath(ctx, tmp)
+		arg0, err = ec.unmarshalNNewPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐNewPath(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.DeletePath
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -275,8 +308,124 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _MediaPath_id(ctx context.Context, field graphql.CollectedField, obj *model.MediaPath) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MediaPath_id(ctx, field)
+func (ec *executionContext) _Mutation_AddPath(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_AddPath(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddPath(rctx, fc.Args["input"].(model.NewPath))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Path)
+	fc.Result = res
+	return ec.marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_AddPath(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Path_id(ctx, field)
+			case "path":
+				return ec.fieldContext_Path_path(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Path", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_AddPath_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_DeletePath(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_DeletePath(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePath(rctx, fc.Args["input"].(model.DeletePath))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_DeletePath(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_DeletePath_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Path_id(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Path_id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -301,26 +450,26 @@ func (ec *executionContext) _MediaPath_id(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MediaPath_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Path_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "MediaPath",
+		Object:     "Path",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _MediaPath_path(ctx context.Context, field graphql.CollectedField, obj *model.MediaPath) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MediaPath_path(ctx, field)
+func (ec *executionContext) _Path_path(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Path_path(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -350,9 +499,9 @@ func (ec *executionContext) _MediaPath_path(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MediaPath_path(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Path_path(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "MediaPath",
+		Object:     "Path",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -363,8 +512,8 @@ func (ec *executionContext) fieldContext_MediaPath_path(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_AddMediaPath(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_AddMediaPath(ctx, field)
+func (ec *executionContext) _Query_Paths(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_Paths(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -377,7 +526,7 @@ func (ec *executionContext) _Mutation_AddMediaPath(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddMediaPath(rctx, fc.Args["input"].(model.NewMediaPath))
+		return ec.resolvers.Query().Paths(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -389,73 +538,12 @@ func (ec *executionContext) _Mutation_AddMediaPath(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.MediaPath)
+	res := resTmp.([]*model.Path)
 	fc.Result = res
-	return ec.marshalNMediaPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐMediaPath(ctx, field.Selections, res)
+	return ec.marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPathᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_AddMediaPath(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_MediaPath_id(ctx, field)
-			case "path":
-				return ec.fieldContext_MediaPath_path(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MediaPath", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_AddMediaPath_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_MediaPaths(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_MediaPaths(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MediaPaths(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.MediaPath)
-	fc.Result = res
-	return ec.marshalNMediaPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐMediaPathᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_MediaPaths(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_Paths(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -464,11 +552,11 @@ func (ec *executionContext) fieldContext_Query_MediaPaths(ctx context.Context, f
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_MediaPath_id(ctx, field)
+				return ec.fieldContext_Path_id(ctx, field)
 			case "path":
-				return ec.fieldContext_MediaPath_path(ctx, field)
+				return ec.fieldContext_Path_path(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type MediaPath", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Path", field.Name)
 		},
 	}
 	return fc, nil
@@ -2376,8 +2464,31 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNewMediaPath(ctx context.Context, obj interface{}) (model.NewMediaPath, error) {
-	var it model.NewMediaPath
+func (ec *executionContext) unmarshalInputDeletePath(ctx context.Context, obj interface{}) (model.DeletePath, error) {
+	var it model.DeletePath
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "pathId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pathId"))
+			it.PathID, err = ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewPath(ctx context.Context, obj interface{}) (model.NewPath, error) {
+	var it model.NewPath
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2407,41 +2518,6 @@ func (ec *executionContext) unmarshalInputNewMediaPath(ctx context.Context, obj 
 
 // region    **************************** object.gotpl ****************************
 
-var mediaPathImplementors = []string{"MediaPath"}
-
-func (ec *executionContext) _MediaPath(ctx context.Context, sel ast.SelectionSet, obj *model.MediaPath) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, mediaPathImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MediaPath")
-		case "id":
-
-			out.Values[i] = ec._MediaPath_id(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "path":
-
-			out.Values[i] = ec._MediaPath_path(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -2461,11 +2537,55 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "AddMediaPath":
+		case "AddPath":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_AddMediaPath(ctx, field)
+				return ec._Mutation_AddPath(ctx, field)
 			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "DeletePath":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_DeletePath(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var pathImplementors = []string{"Path"}
+
+func (ec *executionContext) _Path(ctx context.Context, sel ast.SelectionSet, obj *model.Path) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, pathImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Path")
+		case "id":
+
+			out.Values[i] = ec._Path_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "path":
+
+			out.Values[i] = ec._Path_path(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -2500,7 +2620,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "MediaPaths":
+		case "Paths":
 			field := field
 
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
@@ -2509,7 +2629,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_MediaPaths(ctx, field)
+				res = ec._Query_Paths(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2879,13 +2999,18 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
-	res, err := graphql.UnmarshalID(v)
+func (ec *executionContext) unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx context.Context, v interface{}) (model.DeletePath, error) {
+	res, err := ec.unmarshalInputDeletePath(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	res := graphql.MarshalID(v)
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -2894,11 +3019,16 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNMediaPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐMediaPath(ctx context.Context, sel ast.SelectionSet, v model.MediaPath) graphql.Marshaler {
-	return ec._MediaPath(ctx, sel, &v)
+func (ec *executionContext) unmarshalNNewPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐNewPath(ctx context.Context, v interface{}) (model.NewPath, error) {
+	res, err := ec.unmarshalInputNewPath(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMediaPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐMediaPathᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.MediaPath) graphql.Marshaler {
+func (ec *executionContext) marshalNPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx context.Context, sel ast.SelectionSet, v model.Path) graphql.Marshaler {
+	return ec._Path(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPathᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Path) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2922,7 +3052,7 @@ func (ec *executionContext) marshalNMediaPath2ᚕᚖgithubᚗcomᚋbjornnorgaard
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMediaPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐMediaPath(ctx, sel, v[i])
+			ret[i] = ec.marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2942,19 +3072,14 @@ func (ec *executionContext) marshalNMediaPath2ᚕᚖgithubᚗcomᚋbjornnorgaard
 	return ret
 }
 
-func (ec *executionContext) marshalNMediaPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐMediaPath(ctx context.Context, sel ast.SelectionSet, v *model.MediaPath) graphql.Marshaler {
+func (ec *executionContext) marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx context.Context, sel ast.SelectionSet, v *model.Path) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._MediaPath(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNNewMediaPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐNewMediaPath(ctx context.Context, v interface{}) (model.NewMediaPath, error) {
-	res, err := ec.unmarshalInputNewMediaPath(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
+	return ec._Path(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

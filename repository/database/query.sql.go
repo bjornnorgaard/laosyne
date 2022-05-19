@@ -7,18 +7,17 @@ package database
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
-const createMediaPath = `-- name: CreateMediaPath :one
-INSERT INTO media_paths (path)
-VALUES ($1) RETURNING id, path, created, updated
+const createPath = `-- name: CreatePath :one
+INSERT INTO paths (path, created, updated)
+VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+RETURNING id, path, created, updated
 `
 
-func (q *Queries) CreateMediaPath(ctx context.Context, path string) (MediaPath, error) {
-	row := q.db.QueryRowContext(ctx, createMediaPath, path)
-	var i MediaPath
+func (q *Queries) CreatePath(ctx context.Context, path string) (Path, error) {
+	row := q.db.QueryRowContext(ctx, createPath, path)
+	var i Path
 	err := row.Scan(
 		&i.ID,
 		&i.Path,
@@ -28,15 +27,27 @@ func (q *Queries) CreateMediaPath(ctx context.Context, path string) (MediaPath, 
 	return i, err
 }
 
-const getMediaPathByID = `-- name: GetMediaPathByID :one
-SELECT id, path, created, updated
-FROM media_paths
-WHERE id = $1 LIMIT 1
+const deletePath = `-- name: DeletePath :exec
+DELETE
+FROM paths
+WHERE id = $1
 `
 
-func (q *Queries) GetMediaPathByID(ctx context.Context, id uuid.UUID) (MediaPath, error) {
-	row := q.db.QueryRowContext(ctx, getMediaPathByID, id)
-	var i MediaPath
+func (q *Queries) DeletePath(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deletePath, id)
+	return err
+}
+
+const getPathByID = `-- name: GetPathByID :one
+SELECT id, path, created, updated
+FROM paths
+WHERE id = $1
+LIMIT 1
+`
+
+func (q *Queries) GetPathByID(ctx context.Context, id int64) (Path, error) {
+	row := q.db.QueryRowContext(ctx, getPathByID, id)
+	var i Path
 	err := row.Scan(
 		&i.ID,
 		&i.Path,
@@ -46,21 +57,21 @@ func (q *Queries) GetMediaPathByID(ctx context.Context, id uuid.UUID) (MediaPath
 	return i, err
 }
 
-const getMediaPaths = `-- name: GetMediaPaths :many
+const getPaths = `-- name: GetPaths :many
 SELECT id, path, created, updated
-FROM media_paths
+FROM paths
 ORDER BY path
 `
 
-func (q *Queries) GetMediaPaths(ctx context.Context) ([]MediaPath, error) {
-	rows, err := q.db.QueryContext(ctx, getMediaPaths)
+func (q *Queries) GetPaths(ctx context.Context) ([]Path, error) {
+	rows, err := q.db.QueryContext(ctx, getPaths)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []MediaPath
+	var items []Path
 	for rows.Next() {
-		var i MediaPath
+		var i Path
 		if err := rows.Scan(
 			&i.ID,
 			&i.Path,
@@ -83,7 +94,8 @@ func (q *Queries) GetMediaPaths(ctx context.Context) ([]MediaPath, error) {
 const getPictureByFilter = `-- name: GetPictureByFilter :one
 SELECT id, path, ext, views, likes, rating, deviation, wins, losses, created, updated
 FROM pictures
-WHERE path LIKE '%' + $1 + '%' LIMIT 1
+WHERE path LIKE '%' + $1 + '%'
+LIMIT 1
 `
 
 func (q *Queries) GetPictureByFilter(ctx context.Context, dollar_1 interface{}) (Picture, error) {
@@ -108,10 +120,11 @@ func (q *Queries) GetPictureByFilter(ctx context.Context, dollar_1 interface{}) 
 const getPictureByID = `-- name: GetPictureByID :one
 SELECT id, path, ext, views, likes, rating, deviation, wins, losses, created, updated
 FROM pictures
-WHERE id = $1 LIMIT 1
+WHERE id = $1
+LIMIT 1
 `
 
-func (q *Queries) GetPictureByID(ctx context.Context, id uuid.UUID) (Picture, error) {
+func (q *Queries) GetPictureByID(ctx context.Context, id int64) (Picture, error) {
 	row := q.db.QueryRowContext(ctx, getPictureByID, id)
 	var i Picture
 	err := row.Scan(

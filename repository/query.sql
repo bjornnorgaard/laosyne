@@ -1,28 +1,37 @@
 -- name: GetPictureByID :one
 SELECT *
 FROM pictures
-WHERE id = $1 LIMIT 1;
+WHERE id = $1
+LIMIT 1;
 
 -- name: GetPictureByFilter :one
 SELECT *
 FROM pictures
-WHERE path LIKE '%' + $1 + '%' LIMIT 1;
+WHERE path LIKE '%' + $1 + '%'
+LIMIT 1;
 
 -- name: GetPicturesByFilter :many
 SELECT *
 FROM pictures
 WHERE path LIKE '%' + $1 + '%';
 
--- name: GetMediaPathByID :one
+-- name: GetPathByID :one
 SELECT *
-FROM media_paths
-WHERE id = $1 LIMIT 1;
+FROM paths
+WHERE id = $1
+LIMIT 1;
 
--- name: GetMediaPaths :many
+-- name: GetPaths :many
 SELECT *
-FROM media_paths
+FROM paths
 ORDER BY path;
 
--- name: CreateMediaPath :one
-INSERT INTO media_paths (path)
-VALUES ($1) RETURNING *;
+-- name: CreatePath :one
+INSERT INTO paths (path, created, updated)
+VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+RETURNING *;
+
+-- name: DeletePath :exec
+DELETE
+FROM paths
+WHERE id = $1;
