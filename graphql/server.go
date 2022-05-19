@@ -7,19 +7,19 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/bjornnorgaard/laosyne/graphql/graph"
+	"github.com/bjornnorgaard/laosyne/domain"
 	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
 )
 
 const defaultPort = "8080"
 
-func Start() {
+func Start(api *domain.Api) {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: api}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
