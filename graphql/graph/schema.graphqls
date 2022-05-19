@@ -1,9 +1,9 @@
 type Query {
-  mediaPaths: [MediaPath!]!
+  MediaPaths: [MediaPath!]!
 }
 
 type Mutation {
-  addMediaPath(input: NewMediaPath!): MediaPath!
+  AddMediaPath(input: NewMediaPath!): MediaPath!
 }
 
 type MediaPath {
