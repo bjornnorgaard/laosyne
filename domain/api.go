@@ -2,6 +2,11 @@ package domain
 
 import (
 	"context"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/repository/database"
@@ -78,6 +83,73 @@ func (a Api) DeletePath(ctx context.Context, input model.DeletePath) (bool, erro
 }
 
 func (a Api) ScanPath(ctx context.Context) (bool, error) {
-	// TODO implement me
-	panic("implement me")
+	paths, err := a.db.GetPaths(ctx)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to get paths")
+	}
+
+	for _, p := range paths {
+		a.scanFolder(p.Path)
+	}
+
+	return true, nil
+}
+
+func (a Api) scanFolder(path string) {
+	if runtime.GOOS != "windows" {
+		path = strings.Replace(path, "\\", "/", -1)
+	}
+
+	_, err := os.Stat(path)
+	if err != nil {
+		return
+	}
+
+	dir, err := ioutil.ReadDir(path)
+	if err != nil {
+		return
+	}
+
+	extensions := []string{".jpg", ".jpe", ".bmp", ".gif", ".png", ".webm"}
+	var images []database.Picture
+	for _, info := range dir {
+		itemPath := strings.ToLower(filepath.Join(path, info.Name()))
+		ext := filepath.Ext(itemPath)
+
+		if info.IsDir() {
+			a.scanFolder(itemPath)
+			continue
+		}
+
+		validExtension := contains(extensions, ext)
+		if !validExtension {
+			continue
+		}
+
+		images = append(images, database.Picture{
+			Path: itemPath,
+			Ext:  ext,
+		})
+	}
+
+	if len(images) == 0 {
+		return
+	}
+
+	// TODO: Insert pictures.
+
+	a.removeDeletedMedia()
+}
+
+func (a Api) removeDeletedMedia() {
+	// TODO: Reimplement this function.
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
