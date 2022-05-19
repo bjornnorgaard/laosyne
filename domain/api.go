@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -18,23 +19,32 @@ type Api struct {
 }
 
 func (a Api) Picture(ctx context.Context, filter string) (*model.Picture, error) {
-	picture, err := a.db.GetPictureByFilter(ctx, filter)
+	pictures, err := a.db.GetPicturesByFilter(ctx, database.GetPicturesByFilterParams{
+		Column1: filter,
+		Limit:   1,
+	})
+
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get pic by filter: '%s'", filter)
 	}
 
+	if len(pictures) == 0 {
+		return nil, errors.Newf("no pictures match filter: '%s'", filter)
+	}
+
+	pic := pictures[0]
 	dto := &model.Picture{
-		ID:        int(picture.ID),
-		Path:      picture.Path,
-		Ext:       picture.Ext,
-		Views:     int(picture.Views),
-		Likes:     int(picture.Likes),
-		Rating:    picture.Rating,
-		Deviation: picture.Deviation,
-		Wins:      int(picture.Wins),
-		Losses:    int(picture.Losses),
-		Created:   picture.Created.String(),
-		Updated:   picture.Updated.String(),
+		ID:        int(pic.ID),
+		Path:      pic.Path,
+		Ext:       pic.Ext,
+		Views:     int(pic.Views),
+		Likes:     int(pic.Likes),
+		Rating:    pic.Rating,
+		Deviation: pic.Deviation,
+		Wins:      int(pic.Wins),
+		Losses:    int(pic.Losses),
+		Created:   pic.Created.String(),
+		Updated:   pic.Updated.String(),
 	}
 
 	return dto, nil
@@ -89,13 +99,13 @@ func (a Api) ScanPath(ctx context.Context) (bool, error) {
 	}
 
 	for _, p := range paths {
-		a.scanFolder(p.Path)
+		a.scanFolder(ctx, p.Path)
 	}
 
 	return true, nil
 }
 
-func (a Api) scanFolder(path string) {
+func (a Api) scanFolder(ctx context.Context, path string) {
 	if runtime.GOOS != "windows" {
 		path = strings.Replace(path, "\\", "/", -1)
 	}
@@ -111,13 +121,13 @@ func (a Api) scanFolder(path string) {
 	}
 
 	extensions := []string{".jpg", ".jpe", ".bmp", ".gif", ".png", ".webm"}
-	var images []database.Picture
+	var pictures []database.Picture
 	for _, info := range dir {
 		itemPath := strings.ToLower(filepath.Join(path, info.Name()))
 		ext := filepath.Ext(itemPath)
 
 		if info.IsDir() {
-			a.scanFolder(itemPath)
+			a.scanFolder(ctx, itemPath)
 			continue
 		}
 
@@ -126,23 +136,42 @@ func (a Api) scanFolder(path string) {
 			continue
 		}
 
-		images = append(images, database.Picture{
+		pictures = append(pictures, database.Picture{
 			Path: itemPath,
 			Ext:  ext,
 		})
 	}
 
-	if len(images) == 0 {
+	if len(pictures) == 0 {
 		return
 	}
 
-	// TODO: Insert pictures.
+	for _, p := range pictures {
+		err = a.db.InsertPicture(ctx, database.InsertPictureParams{
+			Path: p.Path,
+			Ext:  p.Ext,
+		})
+		if err != nil {
+			log.Printf("failed to insert pic with path: '%s' and ext: '%s' - err: %s", p.Path, p.Ext, err)
+		}
+	}
 
-	a.removeDeletedMedia()
+	a.removeDeletedMedia(ctx)
 }
 
-func (a Api) removeDeletedMedia() {
-	// TODO: Reimplement this function.
+func (a Api) removeDeletedMedia(ctx context.Context) {
+	params := database.GetPicturesPagedParams{
+		Offset: 0,
+		Limit:  10,
+	}
+	pictures, err := a.db.GetPicturesPaged(ctx, params)
+	if err != nil {
+		log.Printf("paging failed with offset: '%d', limit: '%d' - err: %s", params.Offset, params.Limit, err)
+	}
+
+	for i, picture := range pictures {
+
+	}
 }
 
 func contains(s []string, e string) bool {

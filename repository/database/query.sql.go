@@ -91,32 +91,6 @@ func (q *Queries) GetPaths(ctx context.Context) ([]Path, error) {
 	return items, nil
 }
 
-const getPictureByFilter = `-- name: GetPictureByFilter :one
-SELECT id, path, ext, views, likes, rating, deviation, wins, losses, created, updated
-FROM pictures
-WHERE path LIKE '%' + $1 + '%'
-LIMIT 1
-`
-
-func (q *Queries) GetPictureByFilter(ctx context.Context, dollar_1 interface{}) (Picture, error) {
-	row := q.db.QueryRowContext(ctx, getPictureByFilter, dollar_1)
-	var i Picture
-	err := row.Scan(
-		&i.ID,
-		&i.Path,
-		&i.Ext,
-		&i.Views,
-		&i.Likes,
-		&i.Rating,
-		&i.Deviation,
-		&i.Wins,
-		&i.Losses,
-		&i.Created,
-		&i.Updated,
-	)
-	return i, err
-}
-
 const getPictureByID = `-- name: GetPictureByID :one
 SELECT id, path, ext, views, likes, rating, deviation, wins, losses, created, updated
 FROM pictures
@@ -147,10 +121,16 @@ const getPicturesByFilter = `-- name: GetPicturesByFilter :many
 SELECT id, path, ext, views, likes, rating, deviation, wins, losses, created, updated
 FROM pictures
 WHERE path LIKE '%' + $1 + '%'
+LIMIT $2
 `
 
-func (q *Queries) GetPicturesByFilter(ctx context.Context, dollar_1 interface{}) ([]Picture, error) {
-	rows, err := q.db.QueryContext(ctx, getPicturesByFilter, dollar_1)
+type GetPicturesByFilterParams struct {
+	Column1 interface{}
+	Limit   int32
+}
+
+func (q *Queries) GetPicturesByFilter(ctx context.Context, arg GetPicturesByFilterParams) ([]Picture, error) {
+	rows, err := q.db.QueryContext(ctx, getPicturesByFilter, arg.Column1, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -182,4 +162,68 @@ func (q *Queries) GetPicturesByFilter(ctx context.Context, dollar_1 interface{})
 		return nil, err
 	}
 	return items, nil
+}
+
+const getPicturesPaged = `-- name: GetPicturesPaged :many
+SELECT id, path, ext, views, likes, rating, deviation, wins, losses, created, updated
+FROM pictures
+ORDER BY updated DESC
+OFFSET $1 LIMIT $2
+`
+
+type GetPicturesPagedParams struct {
+	Offset int32
+	Limit  int32
+}
+
+func (q *Queries) GetPicturesPaged(ctx context.Context, arg GetPicturesPagedParams) ([]Picture, error) {
+	rows, err := q.db.QueryContext(ctx, getPicturesPaged, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Picture
+	for rows.Next() {
+		var i Picture
+		if err := rows.Scan(
+			&i.ID,
+			&i.Path,
+			&i.Ext,
+			&i.Views,
+			&i.Likes,
+			&i.Rating,
+			&i.Deviation,
+			&i.Wins,
+			&i.Losses,
+			&i.Created,
+			&i.Updated,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertPicture = `-- name: InsertPicture :exec
+INSERT INTO pictures (path, ext, views, likes, rating, deviation, wins, losses, created, updated)
+VALUES ($1, $2, 0, 0, 0, 0, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (path) DO UPDATE
+    SET updated = CURRENT_TIMESTAMP
+`
+
+type InsertPictureParams struct {
+	Path string
+	Ext  string
+}
+
+func (q *Queries) InsertPicture(ctx context.Context, arg InsertPictureParams) error {
+	_, err := q.db.ExecContext(ctx, insertPicture, arg.Path, arg.Ext)
+	return err
 }
