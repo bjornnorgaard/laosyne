@@ -11,6 +11,8 @@ type NewPath struct {
 }
 
 type Path struct {
-	ID   int    `json:"id"`
-	Path string `json:"path"`
+	ID      int    `json:"id"`
+	Path    string `json:"path"`
+	Created string `json:"created"`
+	Updated string `json:"updated"`
 }

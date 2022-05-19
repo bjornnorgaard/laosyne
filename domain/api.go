@@ -48,8 +48,10 @@ func (a Api) Paths(ctx context.Context) ([]*model.Path, error) {
 	var dto []*model.Path
 	for _, mp := range mediaPaths {
 		dto = append(dto, &model.Path{
-			ID:   int(mp.ID),
-			Path: mp.Path,
+			ID:      int(mp.ID),
+			Path:    mp.Path,
+			Created: mp.Created.String(),
+			Updated: mp.Updated.String(),
 		})
 	}
 

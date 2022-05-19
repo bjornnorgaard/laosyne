@@ -50,8 +50,10 @@ type ComplexityRoot struct {
 	}
 
 	Path struct {
-		ID   func(childComplexity int) int
-		Path func(childComplexity int) int
+		Created func(childComplexity int) int
+		ID      func(childComplexity int) int
+		Path    func(childComplexity int) int
+		Updated func(childComplexity int) int
 	}
 
 	Query struct {
@@ -106,6 +108,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeletePath(childComplexity, args["input"].(model.DeletePath)), true
 
+	case "Path.created":
+		if e.complexity.Path.Created == nil {
+			break
+		}
+
+		return e.complexity.Path.Created(childComplexity), true
+
 	case "Path.id":
 		if e.complexity.Path.ID == nil {
 			break
@@ -119,6 +128,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Path.Path(childComplexity), true
+
+	case "Path.updated":
+		if e.complexity.Path.Updated == nil {
+			break
+		}
+
+		return e.complexity.Path.Updated(childComplexity), true
 
 	case "Query.Paths":
 		if e.complexity.Query.Paths == nil {
@@ -209,6 +225,8 @@ type Mutation {
 type Path {
     id: Int!
     path: String!
+    created: String!
+    updated: String!
 }
 
 input NewPath {
@@ -351,6 +369,10 @@ func (ec *executionContext) fieldContext_Mutation_AddPath(ctx context.Context, f
 				return ec.fieldContext_Path_id(ctx, field)
 			case "path":
 				return ec.fieldContext_Path_path(ctx, field)
+			case "created":
+				return ec.fieldContext_Path_created(ctx, field)
+			case "updated":
+				return ec.fieldContext_Path_updated(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Path", field.Name)
 		},
@@ -512,6 +534,94 @@ func (ec *executionContext) fieldContext_Path_path(ctx context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _Path_created(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Path_created(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Created, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Path_created(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Path",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Path_updated(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Path_updated(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Updated, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Path_updated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Path",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_Paths(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_Paths(ctx, field)
 	if err != nil {
@@ -555,6 +665,10 @@ func (ec *executionContext) fieldContext_Query_Paths(ctx context.Context, field 
 				return ec.fieldContext_Path_id(ctx, field)
 			case "path":
 				return ec.fieldContext_Path_path(ctx, field)
+			case "created":
+				return ec.fieldContext_Path_created(ctx, field)
+			case "updated":
+				return ec.fieldContext_Path_updated(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Path", field.Name)
 		},
@@ -2586,6 +2700,20 @@ func (ec *executionContext) _Path(ctx context.Context, sel ast.SelectionSet, obj
 		case "path":
 
 			out.Values[i] = ec._Path_path(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "created":
+
+			out.Values[i] = ec._Path_created(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updated":
+
+			out.Values[i] = ec._Path_updated(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
