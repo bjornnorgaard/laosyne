@@ -36,6 +36,8 @@ ORDER BY path;
 -- name: CreatePath :one
 INSERT INTO paths (path, created, updated)
 VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT (path) DO UPDATE
+SET updated = CURRENT_TIMESTAMP
 RETURNING *;
 
 -- name: DeletePath :exec

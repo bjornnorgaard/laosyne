@@ -57,8 +57,10 @@ func (a Api) AddPath(ctx context.Context, input model.NewPath) (*model.Path, err
 	}
 
 	dto := &model.Path{
-		ID:   int(created.ID),
-		Path: created.Path,
+		ID:      int(created.ID),
+		Path:    created.Path,
+		Created: created.Created.String(),
+		Updated: created.Updated.String(),
 	}
 
 	return dto, nil
@@ -147,6 +149,7 @@ func (a Api) scanFolder(ctx context.Context, path string) {
 	}
 
 	for _, p := range pictures {
+		// TODO: Find a way to do bulk insert. GORM? SqlBoiler?
 		err = a.db.InsertPicture(ctx, database.InsertPictureParams{
 			Path: p.Path,
 			Ext:  p.Ext,
@@ -156,22 +159,7 @@ func (a Api) scanFolder(ctx context.Context, path string) {
 		}
 	}
 
-	a.removeDeletedMedia(ctx)
-}
-
-func (a Api) removeDeletedMedia(ctx context.Context) {
-	params := database.GetPicturesPagedParams{
-		Offset: 0,
-		Limit:  10,
-	}
-	pictures, err := a.db.GetPicturesPaged(ctx, params)
-	if err != nil {
-		log.Printf("paging failed with offset: '%d', limit: '%d' - err: %s", params.Offset, params.Limit, err)
-	}
-
-	for i, picture := range pictures {
-
-	}
+	// TODO: Remove missing media here.
 }
 
 func contains(s []string, e string) bool {

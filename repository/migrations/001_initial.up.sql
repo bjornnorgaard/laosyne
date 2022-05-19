@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS pictures
 (
     id        BIGSERIAL PRIMARY KEY,
-    path      TEXT      NOT NULL,
+    path      TEXT      NOT NULL UNIQUE,
     ext       TEXT      NOT NULL,
     views     INT       NOT NULL,
     likes     INT       NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS pictures
 CREATE TABLE IF NOT EXISTS paths
 (
     id      BIGSERIAL PRIMARY KEY,
-    path    TEXT      NOT NULL,
+    path    TEXT      NOT NULL UNIQUE,
     created TIMESTAMP NOT NULL,
     updated TIMESTAMP NOT NULL
 );
