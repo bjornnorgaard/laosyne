@@ -1,0 +1,17 @@
+type Query {
+  mediaPaths: [MediaPath!]!
+}
+
+type Mutation {
+  addMediaPath(input: NewMediaPath!): MediaPath!
+}
+
+type MediaPath {
+  id: ID!
+  path: String!
+}
+
+input NewMediaPath {
+  path: String!
+}
+
