@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 
-	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/repository/database"
 	"github.com/cockroachdb/errors"
@@ -13,16 +12,27 @@ type Api struct {
 	db database.Queries
 }
 
-func (a Api) Mutation() generated.MutationResolver {
-	return a
-}
+func (a Api) Picture(ctx context.Context, filter string) (*model.Picture, error) {
+	picture, err := a.db.GetPictureByFilter(ctx, filter)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get pic by filter: '%s'", filter)
+	}
 
-func (a Api) Query() generated.QueryResolver {
-	return a
-}
+	dto := &model.Picture{
+		ID:        int(picture.ID),
+		Path:      picture.Path,
+		Ext:       picture.Ext,
+		Views:     int(picture.Views),
+		Likes:     int(picture.Likes),
+		Rating:    picture.Rating,
+		Deviation: picture.Deviation,
+		Wins:      int(picture.Wins),
+		Losses:    int(picture.Losses),
+		Created:   picture.Created.String(),
+		Updated:   picture.Updated.String(),
+	}
 
-func NewApi(database database.Queries) *Api {
-	return &Api{db: database}
+	return dto, nil
 }
 
 func (a Api) AddPath(ctx context.Context, input model.NewPath) (*model.Path, error) {
@@ -65,4 +75,9 @@ func (a Api) DeletePath(ctx context.Context, input model.DeletePath) (bool, erro
 		return false, errors.Wrap(err, "failed to delete path")
 	}
 	return true, nil
+}
+
+func (a Api) ScanPath(ctx context.Context) (bool, error) {
+	// TODO implement me
+	panic("implement me")
 }

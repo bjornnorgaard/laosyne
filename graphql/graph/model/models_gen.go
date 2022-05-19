@@ -16,3 +16,17 @@ type Path struct {
 	Created string `json:"created"`
 	Updated string `json:"updated"`
 }
+
+type Picture struct {
+	ID        int     `json:"id"`
+	Path      string  `json:"path"`
+	Ext       string  `json:"ext"`
+	Views     int     `json:"views"`
+	Likes     int     `json:"likes"`
+	Rating    float64 `json:"rating"`
+	Deviation float64 `json:"deviation"`
+	Wins      int     `json:"wins"`
+	Losses    int     `json:"losses"`
+	Created   string  `json:"created"`
+	Updated   string  `json:"updated"`
+}

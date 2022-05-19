@@ -1,10 +1,20 @@
 type Query {
     Paths: [Path!]!
+    Picture(filter: String!): Picture!
 }
 
 type Mutation {
     AddPath(input: NewPath!): Path!
     DeletePath(input: DeletePath!): Boolean!
+    ScanPath: Boolean!
+}
+
+input NewPath {
+    path: String!
+}
+
+input DeletePath {
+    pathId: Int!
 }
 
 type Path {
@@ -14,10 +24,16 @@ type Path {
     updated: String!
 }
 
-input NewPath {
-    path: String!
-}
-
-input DeletePath {
-    pathId: Int!
+type Picture {
+    id:        Int!
+    path:      String!
+    ext:       String!
+    views:     Int!
+    likes:     Int!
+    rating:    Float!
+    deviation: Float!
+    wins:      Int!
+    losses:    Int!
+    created:   String!
+    updated:   String!
 }
