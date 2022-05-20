@@ -11,7 +11,8 @@ import (
 
 func main() {
 	repo := repository.NewRepository()
+	gormContext := repository.NewGormContext(repo.DB)
 	queries := database.New(repo)
-	api := domain.NewApi(*queries)
+	api := domain.NewApi(*queries, gormContext)
 	graphql.Start(api)
 }

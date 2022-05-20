@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -13,10 +12,6 @@ import (
 	"github.com/bjornnorgaard/laosyne/repository/database"
 	"github.com/cockroachdb/errors"
 )
-
-type Api struct {
-	db database.Queries
-}
 
 func (a Api) GetPicture(ctx context.Context, filter string) (*model.Picture, error) {
 	pictures, err := a.db.GetPicturesByFilter(ctx, database.GetPicturesByFilterParams{
@@ -86,7 +81,6 @@ func (a Api) GetPaths(ctx context.Context) ([]*model.Path, error) {
 }
 
 func (a Api) DeletePath(ctx context.Context, input model.DeletePath) (bool, error) {
-
 	err := a.db.DeletePath(ctx, int64(input.PathID))
 	if err != nil {
 		return false, errors.Wrap(err, "failed to delete path")
@@ -100,8 +94,10 @@ func (a Api) ScanPath(ctx context.Context) (bool, error) {
 		return false, errors.Wrap(err, "failed to get paths")
 	}
 
+	go a.removeDeletedMedia()
+
 	for _, p := range paths {
-		a.scanFolder(ctx, p.Path)
+		go a.scanFolder(ctx, p.Path)
 	}
 
 	return true, nil
@@ -148,18 +144,33 @@ func (a Api) scanFolder(ctx context.Context, path string) {
 		return
 	}
 
-	for _, p := range pictures {
-		// TODO: Find a way to do bulk insert. GORM? SqlBoiler?
-		err = a.db.InsertPicture(ctx, database.InsertPictureParams{
-			Path: p.Path,
-			Ext:  p.Ext,
-		})
-		if err != nil {
-			log.Printf("failed to insert pic with path: '%s' and ext: '%s' - err: %s", p.Path, p.Ext, err)
+	a.gorm.InsertBulk(pictures)
+}
+
+func (a *Api) removeDeletedMedia() {
+	var count int64
+	batchSize := 100
+	var batch []database.Picture
+
+	a.gorm.Model(&database.Picture{}).Count(&count)
+
+	var idsToDelete []int64
+	for i := 0; i < int(count)/batchSize; i += 100 {
+		a.gorm.Order("id").Offset(i).Limit(batchSize).Find(&batch)
+		for _, image := range batch {
+			_, err := os.Stat(image.Path)
+			if err != nil {
+				idsToDelete = append(idsToDelete, image.ID)
+			}
 		}
+		batch = batch[:0]
 	}
 
-	// TODO: Remove missing media here.
+	if len(idsToDelete) == 0 {
+		return
+	}
+
+	a.gorm.DeleteBulk(idsToDelete)
 }
 
 func contains(s []string, e string) bool {
