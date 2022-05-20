@@ -26,5 +26,6 @@ func main() {
 
 	queries := database.New(db)
 	api := domain.NewApi(*queries)
+
 	graphql.Start(api)
 }
