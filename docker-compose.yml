@@ -34,6 +34,8 @@ services:
       PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
     expose:
       - 9187
+    depends_on:
+      - postgres
 
   grafana:
     image: grafana/grafana:latest
@@ -43,3 +45,5 @@ services:
 #      - prometheus:prometheus
     volumes:
       - ./volumes/grafana/:/var/lib/grafana
+    depends_on:
+      - prometheus
