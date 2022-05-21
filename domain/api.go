@@ -60,7 +60,7 @@ func (a Api) GetPaths(_ context.Context) ([]*model.Path, error) {
 }
 
 func (a Api) DeletePath(_ context.Context, input model.DeletePath) (bool, error) {
-	a.db.Delete(&database.Path{}, input.PathID)
+	a.db.Unscoped().Delete(&database.Path{}, input.PathID)
 	return true, nil
 }
 
@@ -127,7 +127,7 @@ func (a *Api) removeDeletedMedia() {
 	var (
 		limit        = 100
 		offset       = 0
-		pics         = make([]database.Picture, limit)
+		pics         []database.Picture
 		picsToDelete []database.Picture
 	)
 
