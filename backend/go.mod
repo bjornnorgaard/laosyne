@@ -1,4 +1,4 @@
-module github.com/bjornnorgaard/laosyne
+module github.com/bjornnorgaard/laosyne/backend
 
 go 1.18
 

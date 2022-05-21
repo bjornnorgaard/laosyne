@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
-	"github.com/bjornnorgaard/laosyne/repository"
+	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/generated"
+	"github.com/bjornnorgaard/laosyne/backend/repository"
 )
 
 type Api struct {

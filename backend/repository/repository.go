@@ -3,7 +3,7 @@ package repository
 import (
 	"log"
 
-	"github.com/bjornnorgaard/laosyne/repository/database"
+	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 	"github.com/cockroachdb/errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
-	"github.com/bjornnorgaard/laosyne/repository/database"
+	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/model"
+	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 	"github.com/cockroachdb/errors"
 	"github.com/samber/lo"
 	"gorm.io/gorm/clause"

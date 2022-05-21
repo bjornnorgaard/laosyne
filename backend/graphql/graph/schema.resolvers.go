@@ -7,8 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
-	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
+	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/generated"
+	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/model"
 )
 
 func (r *mutationResolver) AddPath(ctx context.Context, input model.NewPath) (*model.Path, error) {
