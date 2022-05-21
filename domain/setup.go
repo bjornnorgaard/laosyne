@@ -3,12 +3,10 @@ package domain
 import (
 	"github.com/bjornnorgaard/laosyne/graphql/graph/generated"
 	"github.com/bjornnorgaard/laosyne/repository"
-	"github.com/bjornnorgaard/laosyne/repository/database"
 )
 
 type Api struct {
-	db   database.Queries
-	gorm repository.GormContext
+	db repository.Repository
 }
 
 func (a Api) Mutation() generated.MutationResolver {
@@ -19,9 +17,8 @@ func (a Api) Query() generated.QueryResolver {
 	return a
 }
 
-func NewApi(database database.Queries, gormContext repository.GormContext) *Api {
+func NewApi(r repository.Repository) *Api {
 	return &Api{
-		db:   database,
-		gorm: gormContext,
+		db: r,
 	}
 }

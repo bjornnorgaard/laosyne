@@ -11,17 +11,12 @@ import (
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/repository/database"
 	"github.com/cockroachdb/errors"
+	"gorm.io/gorm/clause"
 )
 
-func (a Api) GetPicture(ctx context.Context, filter string) (*model.Picture, error) {
-	pictures, err := a.db.GetPicturesByFilter(ctx, database.GetPicturesByFilterParams{
-		Column1: filter,
-		Limit:   1,
-	})
-
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get pic by filter: '%s'", filter)
-	}
+func (a Api) GetPicture(_ context.Context, filter string) (*model.Picture, error) {
+	var pictures []database.Picture
+	a.db.Where("path LIKE %?%", filter).Limit(1).Find(&pictures)
 
 	if len(pictures) == 0 {
 		return nil, errors.Newf("no pictures match filter: '%s'", filter)
@@ -32,78 +27,56 @@ func (a Api) GetPicture(ctx context.Context, filter string) (*model.Picture, err
 		ID:        int(pic.ID),
 		Path:      pic.Path,
 		Ext:       pic.Ext,
-		Views:     int(pic.Views),
-		Likes:     int(pic.Likes),
+		Views:     pic.Views,
+		Likes:     pic.Likes,
 		Rating:    pic.Rating,
 		Deviation: pic.Deviation,
-		Wins:      int(pic.Wins),
-		Losses:    int(pic.Losses),
-		Created:   pic.Created.String(),
-		Updated:   pic.Updated.String(),
+		Wins:      pic.Wins,
+		Losses:    pic.Losses,
+		Created:   pic.CreatedAt.String(),
+		Updated:   pic.UpdatedAt.String(),
 	}
 
 	return dto, nil
 }
 
-func (a Api) AddPath(ctx context.Context, input model.NewPath) (*model.Path, error) {
-	created, err := a.db.CreatePath(ctx, input.Path)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create path")
-	}
-
-	dto := &model.Path{
-		ID:      int(created.ID),
-		Path:    created.Path,
-		Created: created.Created.String(),
-		Updated: created.Updated.String(),
-	}
-
+func (a Api) AddPath(_ context.Context, input model.NewPath) (*model.Path, error) {
+	path := database.Path{Path: input.Path}
+	a.db.Create(&path)
+	dto := &model.Path{ID: int(path.ID), Path: path.Path, Created: path.CreatedAt.String()}
 	return dto, nil
 }
 
-func (a Api) GetPaths(ctx context.Context) ([]*model.Path, error) {
-	mediaPaths, err := a.db.GetPaths(ctx)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get media paths")
-	}
+func (a Api) GetPaths(_ context.Context) ([]*model.Path, error) {
+	var paths []database.Path
+	a.db.Find(&paths)
 
 	var dto []*model.Path
-	for _, mp := range mediaPaths {
-		dto = append(dto, &model.Path{
-			ID:      int(mp.ID),
-			Path:    mp.Path,
-			Created: mp.Created.String(),
-			Updated: mp.Updated.String(),
-		})
+	for _, mp := range paths {
+		dto = append(dto, &model.Path{ID: int(mp.ID), Path: mp.Path, Created: mp.CreatedAt.String()})
 	}
 
 	return dto, nil
 }
 
-func (a Api) DeletePath(ctx context.Context, input model.DeletePath) (bool, error) {
-	err := a.db.DeletePath(ctx, int64(input.PathID))
-	if err != nil {
-		return false, errors.Wrap(err, "failed to delete path")
-	}
+func (a Api) DeletePath(_ context.Context, input model.DeletePath) (bool, error) {
+	a.db.Delete(&database.Path{}, input.PathID)
 	return true, nil
 }
 
 func (a Api) ScanPath(ctx context.Context) (bool, error) {
-	paths, err := a.db.GetPaths(ctx)
-	if err != nil {
-		return false, errors.Wrap(err, "failed to get paths")
-	}
-
-	go a.removeDeletedMedia()
-
+	var paths []database.Path
+	a.db.Find(&paths)
 	for _, p := range paths {
 		go a.scanFolder(ctx, p.Path)
 	}
 
+	go a.removeDeletedMedia()
 	return true, nil
 }
 
 func (a Api) scanFolder(ctx context.Context, path string) {
+	//goland:noinspection ALL
 	if runtime.GOOS != "windows" {
 		path = strings.Replace(path, "\\", "/", -1)
 	}
@@ -144,33 +117,39 @@ func (a Api) scanFolder(ctx context.Context, path string) {
 		return
 	}
 
-	a.gorm.InsertBulk(pictures)
+	// a.db.Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "path"}}, DoNothing: true}).Create(&pictures)
+	a.db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(&pictures, 50)
 }
 
 func (a *Api) removeDeletedMedia() {
-	var count int64
-	batchSize := 100
-	var batch []database.Picture
+	var (
+		limit        = 100
+		offset       = 0
+		pics         = make([]database.Picture, limit)
+		picsToDelete []database.Picture
+	)
 
-	a.gorm.Model(&database.Picture{}).Count(&count)
+	for {
+		a.db.Offset(offset).Limit(limit).Find(&pics)
 
-	var idsToDelete []int64
-	for i := 0; i < int(count)/batchSize; i += 100 {
-		a.gorm.Order("id").Offset(i).Limit(batchSize).Find(&batch)
-		for _, image := range batch {
-			_, err := os.Stat(image.Path)
+		for _, p := range pics {
+			_, err := os.Stat(p.Path)
 			if err != nil {
-				idsToDelete = append(idsToDelete, image.ID)
+				picsToDelete = append(picsToDelete, p)
 			}
 		}
-		batch = batch[:0]
-	}
 
-	if len(idsToDelete) == 0 {
-		return
-	}
+		for _, p := range picsToDelete {
+			a.db.Unscoped().Delete(&p)
+		}
 
-	a.gorm.DeleteBulk(idsToDelete)
+		if len(pics) < limit {
+			break
+		}
+
+		offset += limit
+		pics = pics[:0]
+	}
 }
 
 func contains(s []string, e string) bool {
