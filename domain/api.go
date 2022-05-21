@@ -2,11 +2,14 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/repository/database"
@@ -65,13 +68,30 @@ func (a Api) DeletePath(_ context.Context, input model.DeletePath) (bool, error)
 }
 
 func (a Api) ScanPath(ctx context.Context) (bool, error) {
+	start := time.Now()
+	var wg sync.WaitGroup
+
 	var paths []database.Path
 	a.db.Find(&paths)
+
 	for _, p := range paths {
-		go a.scanFolder(ctx, p.Path)
+		wg.Add(1)
+		path := p.Path
+		go func() {
+			defer wg.Done()
+			a.scanFolder(ctx, path)
+		}()
 	}
 
-	go a.removeDeletedMedia()
+	wg.Wait()
+	elapsed := time.Since(start)
+	fmt.Printf("\nscan took %s", elapsed)
+
+	start = time.Now()
+	a.removeDeletedMedia()
+	elapsed = time.Since(start)
+	fmt.Printf("\ncleanup took %s", elapsed)
+
 	return true, nil
 }
 
