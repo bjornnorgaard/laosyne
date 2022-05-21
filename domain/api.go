@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -16,26 +17,25 @@ import (
 )
 
 func (a Api) GetPicture(_ context.Context, filter string) (*model.Picture, error) {
-	var pictures []database.Picture
-	a.db.Where("path LIKE %?%", filter).Limit(1).Find(&pictures)
+	var picture database.Picture
+	a.db.Where("path LIKE ?", fmt.Sprintf("%%%s%%", filter)).Limit(1).First(&picture)
 
-	if len(pictures) == 0 {
-		return nil, errors.Newf("no pictures match filter: '%s'", filter)
+	if picture.ID == 0 {
+		return nil, errors.Newf("no picture match filter: '%s'", filter)
 	}
 
-	pic := pictures[0]
 	dto := &model.Picture{
-		ID:        int(pic.ID),
-		Path:      pic.Path,
-		Ext:       pic.Ext,
-		Views:     pic.Views,
-		Likes:     pic.Likes,
-		Rating:    pic.Rating,
-		Deviation: pic.Deviation,
-		Wins:      pic.Wins,
-		Losses:    pic.Losses,
-		Created:   pic.CreatedAt.String(),
-		Updated:   pic.UpdatedAt.String(),
+		ID:        int(picture.ID),
+		Path:      picture.Path,
+		Ext:       picture.Ext,
+		Views:     picture.Views,
+		Likes:     picture.Likes,
+		Rating:    picture.Rating,
+		Deviation: picture.Deviation,
+		Wins:      picture.Wins,
+		Losses:    picture.Losses,
+		Created:   picture.CreatedAt.String(),
+		Updated:   picture.UpdatedAt.String(),
 	}
 
 	return dto, nil

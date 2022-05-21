@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	r := repository.NewRepository()
-	api := domain.NewApi(r)
+	db := repository.NewRepository()
+	api := domain.NewApi(db)
 	graphql.Start(api)
 }
