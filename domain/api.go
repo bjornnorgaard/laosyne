@@ -11,6 +11,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/repository/database"
 	"github.com/cockroachdb/errors"
+	"github.com/samber/lo"
 	"gorm.io/gorm/clause"
 )
 
@@ -104,7 +105,7 @@ func (a Api) scanFolder(ctx context.Context, path string) {
 			continue
 		}
 
-		validExtension := contains(extensions, ext)
+		validExtension := lo.Contains(extensions, ext)
 		if !validExtension {
 			continue
 		}
@@ -152,13 +153,4 @@ func (a *Api) removeDeletedMedia() {
 		offset += limit
 		pics = pics[:0]
 	}
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
