@@ -11,10 +11,10 @@ type NewPath struct {
 }
 
 type Path struct {
-	ID      int    `json:"id"`
-	Path    string `json:"path"`
-	Created string `json:"created"`
-	Updated string `json:"updated"`
+	ID        int    `json:"id"`
+	Path      string `json:"path"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
 }
 
 type Picture struct {
@@ -27,6 +27,10 @@ type Picture struct {
 	Deviation float64 `json:"deviation"`
 	Wins      int     `json:"wins"`
 	Losses    int     `json:"losses"`
-	Created   string  `json:"created"`
-	Updated   string  `json:"updated"`
+	CreatedAt string  `json:"createdAt"`
+	UpdatedAt string  `json:"updatedAt"`
+}
+
+type SearchFilter struct {
+	PathFilter *string `json:"pathFilter"`
 }

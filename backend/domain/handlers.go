@@ -14,6 +14,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 	"github.com/cockroachdb/errors"
 	"github.com/samber/lo"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -47,26 +48,59 @@ func (a Api) GetFile() http.Handler {
 	})
 }
 
-func (a Api) GetPicture(_ context.Context, filter string) (*model.Picture, error) {
-	var picture database.Picture
-	a.db.Where("path LIKE ?", fmt.Sprintf("%%%s%%", filter)).Limit(1).First(&picture)
+func (a Api) GetPicture(_ context.Context, input model.SearchFilter) (*model.Picture, error) {
+	var pic database.Picture
+	a.buildQuery(input).Limit(1).First(&pic)
 
-	if picture.ID == 0 {
-		return nil, errors.Newf("no picture match filter: '%s'", filter)
+	if pic.ID == 0 {
+		return nil, errors.Newf("no picture matches filter: '%s'", input.PathFilter)
 	}
 
 	dto := &model.Picture{
-		ID:        int(picture.ID),
-		Path:      picture.Path,
-		Ext:       picture.Ext,
-		Views:     picture.Views,
-		Likes:     picture.Likes,
-		Rating:    picture.Rating,
-		Deviation: picture.Deviation,
-		Wins:      picture.Wins,
-		Losses:    picture.Losses,
-		Created:   picture.CreatedAt.String(),
-		Updated:   picture.UpdatedAt.String(),
+		ID:        int(pic.ID),
+		Path:      pic.Path,
+		Ext:       pic.Ext,
+		Views:     pic.Views,
+		Likes:     pic.Likes,
+		Rating:    pic.Rating,
+		Deviation: pic.Deviation,
+		Wins:      pic.Wins,
+		Losses:    pic.Losses,
+		CreatedAt: pic.CreatedAt.String(),
+		UpdatedAt: pic.UpdatedAt.String(),
+	}
+
+	return dto, nil
+}
+
+func (a Api) buildQuery(input model.SearchFilter) *gorm.DB {
+	query := a.db.Session(&gorm.Session{})
+
+	if input.PathFilter != nil {
+		query = query.Where("path LIKE ?", fmt.Sprintf("%%%s%%", *input.PathFilter))
+	}
+	return query
+}
+
+func (a Api) GetPictures(ctx context.Context, input model.SearchFilter) ([]*model.Picture, error) {
+	var pics []database.Picture
+	a.buildQuery(input).Limit(100).Find(&pics)
+
+	var dto []*model.Picture
+	for _, p := range pics {
+		dto = append(dto, &model.Picture{
+			ID:        int(p.ID),
+			Path:      p.Path,
+			Ext:       p.Ext,
+			Views:     p.Views,
+			Likes:     p.Likes,
+			Rating:    p.Rating,
+			Deviation: p.Deviation,
+			Wins:      p.Wins,
+			Losses:    p.Losses,
+			CreatedAt: p.CreatedAt.String(),
+			UpdatedAt: p.UpdatedAt.String(),
+		})
 	}
 
 	return dto, nil
@@ -75,7 +109,7 @@ func (a Api) GetPicture(_ context.Context, filter string) (*model.Picture, error
 func (a Api) AddPath(_ context.Context, input model.NewPath) (*model.Path, error) {
 	path := database.Path{Path: input.Path}
 	a.db.Create(&path)
-	dto := &model.Path{ID: int(path.ID), Path: path.Path, Created: path.CreatedAt.String()}
+	dto := &model.Path{ID: int(path.ID), Path: path.Path, CreatedAt: path.CreatedAt.String()}
 	return dto, nil
 }
 
@@ -85,7 +119,7 @@ func (a Api) GetPaths(_ context.Context) ([]*model.Path, error) {
 
 	var dto []*model.Path
 	for _, mp := range paths {
-		dto = append(dto, &model.Path{ID: int(mp.ID), Path: mp.Path, Created: mp.CreatedAt.String()})
+		dto = append(dto, &model.Path{ID: int(mp.ID), Path: mp.Path, CreatedAt: mp.CreatedAt.String()})
 	}
 
 	return dto, nil

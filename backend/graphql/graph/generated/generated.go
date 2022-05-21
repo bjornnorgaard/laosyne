@@ -51,14 +51,14 @@ type ComplexityRoot struct {
 	}
 
 	Path struct {
-		Created func(childComplexity int) int
-		ID      func(childComplexity int) int
-		Path    func(childComplexity int) int
-		Updated func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Path      func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 	}
 
 	Picture struct {
-		Created   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
 		Deviation func(childComplexity int) int
 		Ext       func(childComplexity int) int
 		ID        func(childComplexity int) int
@@ -66,14 +66,15 @@ type ComplexityRoot struct {
 		Losses    func(childComplexity int) int
 		Path      func(childComplexity int) int
 		Rating    func(childComplexity int) int
-		Updated   func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
 		Views     func(childComplexity int) int
 		Wins      func(childComplexity int) int
 	}
 
 	Query struct {
-		GetPaths   func(childComplexity int) int
-		GetPicture func(childComplexity int, filter string) int
+		GetPaths    func(childComplexity int) int
+		GetPicture  func(childComplexity int, input model.SearchFilter) int
+		GetPictures func(childComplexity int, input model.SearchFilter) int
 	}
 }
 
@@ -84,7 +85,8 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetPaths(ctx context.Context) ([]*model.Path, error)
-	GetPicture(ctx context.Context, filter string) (*model.Picture, error)
+	GetPicture(ctx context.Context, input model.SearchFilter) (*model.Picture, error)
+	GetPictures(ctx context.Context, input model.SearchFilter) ([]*model.Picture, error)
 }
 
 type executableSchema struct {
@@ -133,12 +135,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ScanPath(childComplexity), true
 
-	case "Path.created":
-		if e.complexity.Path.Created == nil {
+	case "Path.createdAt":
+		if e.complexity.Path.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Path.Created(childComplexity), true
+		return e.complexity.Path.CreatedAt(childComplexity), true
 
 	case "Path.id":
 		if e.complexity.Path.ID == nil {
@@ -154,19 +156,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Path.Path(childComplexity), true
 
-	case "Path.updated":
-		if e.complexity.Path.Updated == nil {
+	case "Path.updatedAt":
+		if e.complexity.Path.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.Path.Updated(childComplexity), true
+		return e.complexity.Path.UpdatedAt(childComplexity), true
 
-	case "Picture.created":
-		if e.complexity.Picture.Created == nil {
+	case "Picture.createdAt":
+		if e.complexity.Picture.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Picture.Created(childComplexity), true
+		return e.complexity.Picture.CreatedAt(childComplexity), true
 
 	case "Picture.deviation":
 		if e.complexity.Picture.Deviation == nil {
@@ -217,12 +219,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Picture.Rating(childComplexity), true
 
-	case "Picture.updated":
-		if e.complexity.Picture.Updated == nil {
+	case "Picture.updatedAt":
+		if e.complexity.Picture.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.Picture.Updated(childComplexity), true
+		return e.complexity.Picture.UpdatedAt(childComplexity), true
 
 	case "Picture.views":
 		if e.complexity.Picture.Views == nil {
@@ -255,7 +257,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPicture(childComplexity, args["filter"].(string)), true
+		return e.complexity.Query.GetPicture(childComplexity, args["input"].(model.SearchFilter)), true
+
+	case "Query.GetPictures":
+		if e.complexity.Query.GetPictures == nil {
+			break
+		}
+
+		args, err := ec.field_Query_GetPictures_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetPictures(childComplexity, args["input"].(model.SearchFilter)), true
 
 	}
 	return 0, false
@@ -267,6 +281,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputDeletePath,
 		ec.unmarshalInputNewPath,
+		ec.unmarshalInputSearchFilter,
 	)
 	first := true
 
@@ -329,14 +344,21 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `type Query {
     GetPaths: [Path!]!
-    GetPicture(filter: String!): Picture!
+    GetPicture(input: SearchFilter!): Picture!
+    GetPictures(input: SearchFilter!): [Picture!]!
+}
+
+input SearchFilter {
+    pathFilter: String
 }
 
 type Mutation {
+    # Does something
     AddPath(input: NewPath!): Path!
     DeletePath(input: DeletePath!): Boolean!
     ScanPath: Boolean!
 }
+
 
 input NewPath {
     path: String!
@@ -349,8 +371,8 @@ input DeletePath {
 type Path {
     id: Int!
     path: String!
-    created: String!
-    updated: String!
+    createdAt: String!
+    updatedAt: String!
 }
 
 type Picture {
@@ -363,8 +385,8 @@ type Picture {
     deviation: Float!
     wins:      Int!
     losses:    Int!
-    created:   String!
-    updated:   String!
+    createdAt:   String!
+    updatedAt:   String!
 }
 `, BuiltIn: false},
 }
@@ -380,7 +402,7 @@ func (ec *executionContext) field_Mutation_AddPath_args(ctx context.Context, raw
 	var arg0 model.NewPath
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNNewPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐNewPath(ctx, tmp)
+		arg0, err = ec.unmarshalNNewPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐNewPath(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -395,7 +417,7 @@ func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, 
 	var arg0 model.DeletePath
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx, tmp)
+		arg0, err = ec.unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -407,15 +429,30 @@ func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, 
 func (ec *executionContext) field_Query_GetPicture_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["filter"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 model.SearchFilter
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSearchFilter2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["filter"] = arg0
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_GetPictures_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.SearchFilter
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNSearchFilter2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -500,7 +537,7 @@ func (ec *executionContext) _Mutation_AddPath(ctx context.Context, field graphql
 	}
 	res := resTmp.(*model.Path)
 	fc.Result = res
-	return ec.marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx, field.Selections, res)
+	return ec.marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPath(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_AddPath(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -515,10 +552,10 @@ func (ec *executionContext) fieldContext_Mutation_AddPath(ctx context.Context, f
 				return ec.fieldContext_Path_id(ctx, field)
 			case "path":
 				return ec.fieldContext_Path_path(ctx, field)
-			case "created":
-				return ec.fieldContext_Path_created(ctx, field)
-			case "updated":
-				return ec.fieldContext_Path_updated(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Path_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Path_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Path", field.Name)
 		},
@@ -724,8 +761,8 @@ func (ec *executionContext) fieldContext_Path_path(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Path_created(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Path_created(ctx, field)
+func (ec *executionContext) _Path_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Path_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -738,7 +775,7 @@ func (ec *executionContext) _Path_created(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Created, nil
+		return obj.CreatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -755,7 +792,7 @@ func (ec *executionContext) _Path_created(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Path_created(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Path_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Path",
 		Field:      field,
@@ -768,8 +805,8 @@ func (ec *executionContext) fieldContext_Path_created(ctx context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Path_updated(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Path_updated(ctx, field)
+func (ec *executionContext) _Path_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Path) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Path_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -782,7 +819,7 @@ func (ec *executionContext) _Path_updated(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Updated, nil
+		return obj.UpdatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -799,7 +836,7 @@ func (ec *executionContext) _Path_updated(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Path_updated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Path_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Path",
 		Field:      field,
@@ -1208,8 +1245,8 @@ func (ec *executionContext) fieldContext_Picture_losses(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Picture_created(ctx context.Context, field graphql.CollectedField, obj *model.Picture) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Picture_created(ctx, field)
+func (ec *executionContext) _Picture_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Picture) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Picture_createdAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1222,7 +1259,7 @@ func (ec *executionContext) _Picture_created(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Created, nil
+		return obj.CreatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1239,7 +1276,7 @@ func (ec *executionContext) _Picture_created(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Picture_created(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Picture_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Picture",
 		Field:      field,
@@ -1252,8 +1289,8 @@ func (ec *executionContext) fieldContext_Picture_created(ctx context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Picture_updated(ctx context.Context, field graphql.CollectedField, obj *model.Picture) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Picture_updated(ctx, field)
+func (ec *executionContext) _Picture_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Picture) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Picture_updatedAt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1266,7 +1303,7 @@ func (ec *executionContext) _Picture_updated(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Updated, nil
+		return obj.UpdatedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1283,7 +1320,7 @@ func (ec *executionContext) _Picture_updated(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Picture_updated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Picture_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Picture",
 		Field:      field,
@@ -1324,7 +1361,7 @@ func (ec *executionContext) _Query_GetPaths(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*model.Path)
 	fc.Result = res
-	return ec.marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPathᚄ(ctx, field.Selections, res)
+	return ec.marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPathᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetPaths(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1339,10 +1376,10 @@ func (ec *executionContext) fieldContext_Query_GetPaths(ctx context.Context, fie
 				return ec.fieldContext_Path_id(ctx, field)
 			case "path":
 				return ec.fieldContext_Path_path(ctx, field)
-			case "created":
-				return ec.fieldContext_Path_created(ctx, field)
-			case "updated":
-				return ec.fieldContext_Path_updated(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Path_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Path_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Path", field.Name)
 		},
@@ -1364,7 +1401,7 @@ func (ec *executionContext) _Query_GetPicture(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPicture(rctx, fc.Args["filter"].(string))
+		return ec.resolvers.Query().GetPicture(rctx, fc.Args["input"].(model.SearchFilter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1378,7 +1415,7 @@ func (ec *executionContext) _Query_GetPicture(ctx context.Context, field graphql
 	}
 	res := resTmp.(*model.Picture)
 	fc.Result = res
-	return ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, field.Selections, res)
+	return ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetPicture(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1407,10 +1444,10 @@ func (ec *executionContext) fieldContext_Query_GetPicture(ctx context.Context, f
 				return ec.fieldContext_Picture_wins(ctx, field)
 			case "losses":
 				return ec.fieldContext_Picture_losses(ctx, field)
-			case "created":
-				return ec.fieldContext_Picture_created(ctx, field)
-			case "updated":
-				return ec.fieldContext_Picture_updated(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Picture_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Picture_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Picture", field.Name)
 		},
@@ -1423,6 +1460,85 @@ func (ec *executionContext) fieldContext_Query_GetPicture(ctx context.Context, f
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_GetPicture_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_GetPictures(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_GetPictures(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetPictures(rctx, fc.Args["input"].(model.SearchFilter))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Picture)
+	fc.Result = res
+	return ec.marshalNPicture2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPictureᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_GetPictures(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Picture_id(ctx, field)
+			case "path":
+				return ec.fieldContext_Picture_path(ctx, field)
+			case "ext":
+				return ec.fieldContext_Picture_ext(ctx, field)
+			case "views":
+				return ec.fieldContext_Picture_views(ctx, field)
+			case "likes":
+				return ec.fieldContext_Picture_likes(ctx, field)
+			case "rating":
+				return ec.fieldContext_Picture_rating(ctx, field)
+			case "deviation":
+				return ec.fieldContext_Picture_deviation(ctx, field)
+			case "wins":
+				return ec.fieldContext_Picture_wins(ctx, field)
+			case "losses":
+				return ec.fieldContext_Picture_losses(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Picture_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Picture_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Picture", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_GetPictures_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3377,6 +3493,29 @@ func (ec *executionContext) unmarshalInputNewPath(ctx context.Context, obj inter
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj interface{}) (model.SearchFilter, error) {
+	var it model.SearchFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "pathFilter":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pathFilter"))
+			it.PathFilter, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3466,16 +3605,16 @@ func (ec *executionContext) _Path(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "created":
+		case "createdAt":
 
-			out.Values[i] = ec._Path_created(ctx, field, obj)
+			out.Values[i] = ec._Path_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updated":
+		case "updatedAt":
 
-			out.Values[i] = ec._Path_updated(ctx, field, obj)
+			out.Values[i] = ec._Path_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3564,16 +3703,16 @@ func (ec *executionContext) _Picture(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "created":
+		case "createdAt":
 
-			out.Values[i] = ec._Picture_created(ctx, field, obj)
+			out.Values[i] = ec._Picture_createdAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updated":
+		case "updatedAt":
 
-			out.Values[i] = ec._Picture_updated(ctx, field, obj)
+			out.Values[i] = ec._Picture_updatedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -3641,6 +3780,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_GetPicture(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "GetPictures":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_GetPictures(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4010,7 +4172,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx context.Context, v interface{}) (model.DeletePath, error) {
+func (ec *executionContext) unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx context.Context, v interface{}) (model.DeletePath, error) {
 	res, err := ec.unmarshalInputDeletePath(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -4045,16 +4207,16 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐNewPath(ctx context.Context, v interface{}) (model.NewPath, error) {
+func (ec *executionContext) unmarshalNNewPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐNewPath(ctx context.Context, v interface{}) (model.NewPath, error) {
 	res, err := ec.unmarshalInputNewPath(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx context.Context, sel ast.SelectionSet, v model.Path) graphql.Marshaler {
+func (ec *executionContext) marshalNPath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPath(ctx context.Context, sel ast.SelectionSet, v model.Path) graphql.Marshaler {
 	return ec._Path(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPathᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Path) graphql.Marshaler {
+func (ec *executionContext) marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPathᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Path) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -4078,7 +4240,7 @@ func (ec *executionContext) marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋla
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx, sel, v[i])
+			ret[i] = ec.marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPath(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4098,7 +4260,7 @@ func (ec *executionContext) marshalNPath2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋla
 	return ret
 }
 
-func (ec *executionContext) marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPath(ctx context.Context, sel ast.SelectionSet, v *model.Path) graphql.Marshaler {
+func (ec *executionContext) marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPath(ctx context.Context, sel ast.SelectionSet, v *model.Path) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4108,11 +4270,55 @@ func (ec *executionContext) marshalNPath2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosy
 	return ec._Path(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPicture2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx context.Context, sel ast.SelectionSet, v model.Picture) graphql.Marshaler {
+func (ec *executionContext) marshalNPicture2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx context.Context, sel ast.SelectionSet, v model.Picture) graphql.Marshaler {
 	return ec._Picture(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx context.Context, sel ast.SelectionSet, v *model.Picture) graphql.Marshaler {
+func (ec *executionContext) marshalNPicture2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPictureᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Picture) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx context.Context, sel ast.SelectionSet, v *model.Picture) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4120,6 +4326,11 @@ func (ec *executionContext) marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋla
 		return graphql.Null
 	}
 	return ec._Picture(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSearchFilter2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx context.Context, v interface{}) (model.SearchFilter, error) {
+	res, err := ec.unmarshalInputSearchFilter(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

@@ -14,8 +14,18 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Container(
           child: Center(
-            child: Image.network("http://localhost:8080/test?id=3s"),
-          )
+            child: Image.network(
+              "http://10.0.2.2:8080/p?id=3",
+              loadingBuilder: ((context, child, loadingProgress) {
+                return loadingProgress == null
+                    ? child
+                    : const CircularProgressIndicator();
+              }),
+              height: 700,
+              width: 700,
+              fit: BoxFit.fitWidth,
+            ),
+          ),
         ),
       ),
     );

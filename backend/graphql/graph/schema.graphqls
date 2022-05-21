@@ -1,6 +1,11 @@
 type Query {
     GetPaths: [Path!]!
-    GetPicture(filter: String!): Picture!
+    GetPicture(input: SearchFilter!): Picture!
+    GetPictures(input: SearchFilter!): [Picture!]!
+}
+
+input SearchFilter {
+    pathFilter: String
 }
 
 type Mutation {
@@ -8,6 +13,7 @@ type Mutation {
     DeletePath(input: DeletePath!): Boolean!
     ScanPath: Boolean!
 }
+
 
 input NewPath {
     path: String!
@@ -20,8 +26,8 @@ input DeletePath {
 type Path {
     id: Int!
     path: String!
-    created: String!
-    updated: String!
+    createdAt: String!
+    updatedAt: String!
 }
 
 type Picture {
@@ -34,6 +40,6 @@ type Picture {
     deviation: Float!
     wins:      Int!
     losses:    Int!
-    created:   String!
-    updated:   String!
+    createdAt:   String!
+    updatedAt:   String!
 }
