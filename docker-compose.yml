@@ -1,6 +1,8 @@
 version: '3.8'
+
 services:
-  pg:
+
+  postgres:
     image: postgres
     ports:
       - "5432:5432"
@@ -8,3 +10,36 @@ services:
       POSTGRES_PASSWORD: "changeme"
     volumes:
       - ./volumes/postgres:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus:v2.30.4
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - ./volumes/prometheus:/prometheus
+    # Reload condig with: curl -X POST http://localhost:9090/-/reload
+    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    expose:
+      - 9100
+
+  postgres-exporter:
+    image: bitnami/postgres-exporter:latest
+    environment:
+      DATABASE_SOURCE_URI: "postgres?sslmode=disable"
+      DATABASE_SOURCE_PASS: "changeme"
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+    expose:
+      - 9187
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+#    links:
+#      - prometheus:prometheus
+    volumes:
+      - ./volumes/grafana/:/var/lib/grafana
