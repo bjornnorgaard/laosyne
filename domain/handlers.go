@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,6 +16,36 @@ import (
 	"github.com/samber/lo"
 	"gorm.io/gorm/clause"
 )
+
+func (a Api) GetFile() http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		id := request.URL.Query()["id"]
+		if len(id) != 1 {
+			writer.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		var pic database.Picture
+		a.db.First(&pic, id)
+
+		if pic.ID == 0 {
+			writer.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		fileBytes, err := ioutil.ReadFile(pic.Path)
+		if err != nil {
+			writer.WriteHeader(http.StatusExpectationFailed)
+			return
+		}
+
+		_, err = writer.Write(fileBytes)
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	})
+}
 
 func (a Api) GetPicture(_ context.Context, filter string) (*model.Picture, error) {
 	var picture database.Picture
