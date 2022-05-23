@@ -29,8 +29,7 @@ services:
   postgres-exporter:
     image: bitnami/postgres-exporter:latest
     environment:
-      DATABASE_SOURCE_URI: "postgres?sslmode=disable"
-      DATABASE_SOURCE_PASS: "changeme"
+      DATA_SOURCE_NAME: "postgresql://postgres:changeme@postgres:5432/postgres?sslmode=disable"
       PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
     expose:
       - 9187
