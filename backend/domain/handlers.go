@@ -34,7 +34,7 @@ func (a Api) GetFile() http.Handler {
 			return
 		}
 
-		fileBytes, err := ioutil.ReadFile(pic.Path)
+		fileBytes, err := os.ReadFile(pic.Path)
 		if err != nil {
 			writer.WriteHeader(http.StatusExpectationFailed)
 			return
