@@ -32,5 +32,5 @@ type Picture struct {
 }
 
 type SearchFilter struct {
-	PathFilter *string `json:"pathFilter"`
+	PathContains *string `json:"pathContains"`
 }

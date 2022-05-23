@@ -48,12 +48,12 @@ func (a Api) GetFile() http.Handler {
 	})
 }
 
-func (a Api) GetPicture(_ context.Context, input model.SearchFilter) (*model.Picture, error) {
+func (a Api) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Picture, error) {
 	var pic database.Picture
 	a.buildQuery(input).Limit(1).First(&pic)
 
 	if pic.ID == 0 {
-		return nil, errors.New(fmt.Sprintf("no picture matches filter: '%s'", input.PathFilter))
+		return nil, errors.New(fmt.Sprintf("no picture matches filter: '%s'", input.PathContains))
 	}
 
 	dto := &model.Picture{
@@ -73,16 +73,21 @@ func (a Api) GetPicture(_ context.Context, input model.SearchFilter) (*model.Pic
 	return dto, nil
 }
 
-func (a Api) buildQuery(input model.SearchFilter) *gorm.DB {
+func (a Api) buildQuery(input *model.SearchFilter) *gorm.DB {
 	query := a.db.Session(&gorm.Session{})
 
-	if input.PathFilter != nil {
-		query = query.Where("path LIKE ?", fmt.Sprintf("%%%s%%", *input.PathFilter))
+	if input == nil {
+		return query
 	}
+
+	if input.PathContains != nil {
+		query = query.Where("path LIKE ?", fmt.Sprintf("%%%s%%", *input.PathContains))
+	}
+
 	return query
 }
 
-func (a Api) GetPictures(ctx context.Context, input model.SearchFilter) ([]*model.Picture, error) {
+func (a Api) GetPictures(ctx context.Context, input *model.SearchFilter) ([]*model.Picture, error) {
 	var pics []database.Picture
 	a.buildQuery(input).Limit(100).Find(&pics)
 

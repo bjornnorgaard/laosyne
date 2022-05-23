@@ -73,8 +73,8 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetPaths    func(childComplexity int) int
-		GetPicture  func(childComplexity int, input model.SearchFilter) int
-		GetPictures func(childComplexity int, input model.SearchFilter) int
+		GetPicture  func(childComplexity int, input *model.SearchFilter) int
+		GetPictures func(childComplexity int, input *model.SearchFilter) int
 	}
 }
 
@@ -85,8 +85,8 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetPaths(ctx context.Context) ([]*model.Path, error)
-	GetPicture(ctx context.Context, input model.SearchFilter) (*model.Picture, error)
-	GetPictures(ctx context.Context, input model.SearchFilter) ([]*model.Picture, error)
+	GetPicture(ctx context.Context, input *model.SearchFilter) (*model.Picture, error)
+	GetPictures(ctx context.Context, input *model.SearchFilter) ([]*model.Picture, error)
 }
 
 type executableSchema struct {
@@ -257,7 +257,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPicture(childComplexity, args["input"].(model.SearchFilter)), true
+		return e.complexity.Query.GetPicture(childComplexity, args["input"].(*model.SearchFilter)), true
 
 	case "Query.GetPictures":
 		if e.complexity.Query.GetPictures == nil {
@@ -269,7 +269,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPictures(childComplexity, args["input"].(model.SearchFilter)), true
+		return e.complexity.Query.GetPictures(childComplexity, args["input"].(*model.SearchFilter)), true
 
 	}
 	return 0, false
@@ -344,16 +344,15 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `type Query {
     GetPaths: [Path!]!
-    GetPicture(input: SearchFilter!): Picture!
-    GetPictures(input: SearchFilter!): [Picture!]!
+    GetPicture(input: SearchFilter): Picture!
+    GetPictures(input: SearchFilter): [Picture!]!
 }
 
 input SearchFilter {
-    pathFilter: String
+    pathContains: String
 }
 
 type Mutation {
-    # Does something
     AddPath(input: NewPath!): Path!
     DeletePath(input: DeletePath!): Boolean!
     ScanPath: Boolean!
@@ -429,10 +428,10 @@ func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, 
 func (ec *executionContext) field_Query_GetPicture_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SearchFilter
+	var arg0 *model.SearchFilter
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSearchFilter2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
+		arg0, err = ec.unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -444,10 +443,10 @@ func (ec *executionContext) field_Query_GetPicture_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_GetPictures_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SearchFilter
+	var arg0 *model.SearchFilter
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSearchFilter2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
+		arg0, err = ec.unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1401,7 +1400,7 @@ func (ec *executionContext) _Query_GetPicture(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPicture(rctx, fc.Args["input"].(model.SearchFilter))
+		return ec.resolvers.Query().GetPicture(rctx, fc.Args["input"].(*model.SearchFilter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1480,7 +1479,7 @@ func (ec *executionContext) _Query_GetPictures(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPictures(rctx, fc.Args["input"].(model.SearchFilter))
+		return ec.resolvers.Query().GetPictures(rctx, fc.Args["input"].(*model.SearchFilter))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3502,11 +3501,11 @@ func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj 
 
 	for k, v := range asMap {
 		switch k {
-		case "pathFilter":
+		case "pathContains":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pathFilter"))
-			it.PathFilter, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pathContains"))
+			it.PathContains, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4328,11 +4327,6 @@ func (ec *executionContext) marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋla
 	return ec._Picture(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSearchFilter2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx context.Context, v interface{}) (model.SearchFilter, error) {
-	res, err := ec.unmarshalInputSearchFilter(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4625,6 +4619,14 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx context.Context, v interface{}) (*model.SearchFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputSearchFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

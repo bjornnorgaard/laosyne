@@ -1,11 +1,11 @@
 type Query {
     GetPaths: [Path!]!
-    GetPicture(input: SearchFilter!): Picture!
-    GetPictures(input: SearchFilter!): [Picture!]!
+    GetPicture(input: SearchFilter): Picture!
+    GetPictures(input: SearchFilter): [Picture!]!
 }
 
 input SearchFilter {
-    pathFilter: String
+    pathContains: String
 }
 
 type Mutation {

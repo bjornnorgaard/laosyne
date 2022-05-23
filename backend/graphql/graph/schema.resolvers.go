@@ -27,11 +27,11 @@ func (r *queryResolver) GetPaths(ctx context.Context) ([]*model.Path, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) GetPicture(ctx context.Context, input model.SearchFilter) (*model.Picture, error) {
+func (r *queryResolver) GetPicture(ctx context.Context, input *model.SearchFilter) (*model.Picture, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *queryResolver) GetPictures(ctx context.Context, input model.SearchFilter) ([]*model.Picture, error) {
+func (r *queryResolver) GetPictures(ctx context.Context, input *model.SearchFilter) ([]*model.Picture, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
