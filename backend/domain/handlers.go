@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
-	"github.com/cockroachdb/errors"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -53,7 +53,7 @@ func (a Api) GetPicture(_ context.Context, input model.SearchFilter) (*model.Pic
 	a.buildQuery(input).Limit(1).First(&pic)
 
 	if pic.ID == 0 {
-		return nil, errors.Newf("no picture matches filter: '%s'", input.PathFilter)
+		return nil, errors.New(fmt.Sprintf("no picture matches filter: '%s'", input.PathFilter))
 	}
 
 	dto := &model.Picture{

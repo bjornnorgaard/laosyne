@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
-	"github.com/cockroachdb/errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -18,12 +18,12 @@ func NewRepository() Repository {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "failed to open database connection"))
+		log.Fatal(fmt.Errorf("failed to open database connection, %w", err))
 	}
 
 	err = db.AutoMigrate(&database.Picture{}, &database.Path{})
 	if err != nil {
-		log.Fatal(errors.Wrap(err, "failed to migrate database"))
+		log.Fatal(fmt.Errorf("failed to migrate database: %w", err))
 	}
 
 	return Repository{db}
