@@ -41,8 +41,6 @@ services:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
-#    links:
-#      - prometheus:prometheus
     volumes:
       - ./volumes/grafana/:/var/lib/grafana
     depends_on:
