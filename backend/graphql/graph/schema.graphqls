@@ -12,8 +12,20 @@ type Mutation {
     AddPath(input: NewPath!): Path!
     DeletePath(input: DeletePath!): Boolean!
     ScanPath: Boolean!
+    AddToRating(pictureId: Int!): Picture!
+    CreateMatch(input: SearchFilter): Match!
+    ReportMatchResult(input: MatchResult!): Boolean!
 }
 
+input MatchResult {
+    winnerId: Int!
+    loserId: Int!
+}
+
+type Match {
+    playerOne: Picture!
+    playerTwo: Picture!
+}
 
 input NewPath {
     path: String!

@@ -28,3 +28,18 @@ func NewRepository() Repository {
 
 	return Repository{db}
 }
+
+func (r Repository) QueryPictures() *gorm.DB {
+	return r.Session(&gorm.Session{})
+}
+
+func (r Repository) FindByID(id int) (*database.Picture, error) {
+	var pic database.Picture
+
+	r.DB.First(&pic, id)
+	if pic.ID == 0 {
+		return nil, fmt.Errorf("no picture with ID %d", id)
+	}
+
+	return &pic, nil
+}

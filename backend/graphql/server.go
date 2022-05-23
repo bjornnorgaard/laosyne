@@ -28,7 +28,7 @@ func Start(api *domain.Api) {
 	router.Use(cors.Default().Handler, middleware.Logger, middleware.Heartbeat("/hc"), middleware.Recoverer)
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: api}))
 
-	router.Handle("/", playground.Handler("Starwars", "/query"))
+	router.Handle("/", playground.Handler("Laosyne", "/query"))
 	router.Handle("/query", srv)
 	router.Handle("/p", api.GetFile())
 

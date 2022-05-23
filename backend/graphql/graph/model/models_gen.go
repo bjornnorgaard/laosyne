@@ -6,6 +6,16 @@ type DeletePath struct {
 	PathID int `json:"pathId"`
 }
 
+type Match struct {
+	PlayerOne *Picture `json:"playerOne"`
+	PlayerTwo *Picture `json:"playerTwo"`
+}
+
+type MatchResult struct {
+	WinnerID int `json:"winnerId"`
+	LoserID  int `json:"loserId"`
+}
+
 type NewPath struct {
 	Path string `json:"path"`
 }

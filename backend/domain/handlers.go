@@ -2,9 +2,9 @@ package domain
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,6 +13,7 @@ import (
 
 	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
+	"github.com/bjornnorgaard/laosyne/backend/trueskill"
 	"github.com/samber/lo"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -48,14 +49,113 @@ func (a Api) GetFile() http.Handler {
 	})
 }
 
+func (a Api) AddToRating(ctx context.Context, pictureID int) (*model.Picture, error) {
+	var pic database.Picture
+	a.db.First(&pic, pictureID)
+	if pic.ID == 0 {
+		return nil, fmt.Errorf("no pic with id %d", pictureID)
+	}
+
+	if pic.Rating != 0 {
+		return mapPic(pic), nil
+	}
+
+	pic.Rating = trueskill.DefaultMu
+	pic.Deviation = trueskill.DefaultSigma
+	a.db.Save(&pic)
+
+	dto := mapPic(pic)
+	return dto, nil
+}
+
+func (a Api) CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error) {
+	var challenger database.Picture
+
+	a.buildQuery(input).
+		Where("rating <> 0").
+		Where("wins < 20").
+		Where("losses < 20").
+		Where("2 < deviation").
+		Order("RANDOM()").
+		First(&challenger)
+
+	opponent := a.findOpponent(challenger)
+
+	match := &model.Match{
+		PlayerOne: mapPic(challenger),
+		PlayerTwo: mapPic(opponent),
+	}
+
+	if rand.Intn(100)%2 == 0 {
+		tempOne := match.PlayerOne
+		match.PlayerOne = match.PlayerTwo
+		match.PlayerTwo = tempOne
+	}
+
+	return match, nil
+}
+
+func (a Api) findOpponent(challenger database.Picture) database.Picture {
+	var opponent database.Picture
+
+	a.db.QueryPictures().
+		Where("id != ?", challenger.ID).
+		Where("rating <> 0").
+		Order("RANDOM()").
+		First(&opponent)
+
+	return opponent
+}
+
+func (a Api) ReportMatchResult(ctx context.Context, input model.MatchResult) (bool, error) {
+	winner, err := a.db.FindByID(input.WinnerID)
+	if err != nil {
+		return false, fmt.Errorf("no picture with winner ID %d", input.WinnerID)
+	}
+
+	loser, err := a.db.FindByID(input.LoserID)
+	if err != nil {
+		return false, fmt.Errorf("no picture with loser ID %d", input.WinnerID)
+	}
+
+	ts := trueskill.New(trueskill.DrawProbabilityZero())
+
+	playerWinner := trueskill.NewPlayer(winner.Rating, winner.Deviation)
+	playerLoser := trueskill.NewPlayer(loser.Rating, loser.Deviation)
+
+	skills := []trueskill.Player{playerWinner, playerLoser}
+	newSkills, _ := ts.AdjustSkills(skills, false)
+
+	playerWinner = newSkills[0]
+	playerLoser = newSkills[1]
+
+	winner.Rating = playerWinner.Mean()
+	winner.Deviation = playerWinner.Sigma()
+	winner.Wins++
+
+	loser.Rating = playerLoser.Mean()
+	loser.Deviation = playerLoser.Sigma()
+	loser.Losses++
+
+	a.db.Save(&winner)
+	a.db.Save(&loser)
+
+	return true, nil
+}
+
 func (a Api) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Picture, error) {
 	var pic database.Picture
 	a.buildQuery(input).Limit(1).First(&pic)
 
 	if pic.ID == 0 {
-		return nil, errors.New(fmt.Sprintf("no picture matches filter: '%s'", input.PathContains))
+		return nil, fmt.Errorf("no picture matches filter: '%s'", input.PathContains)
 	}
 
+	dto := mapPic(pic)
+	return dto, nil
+}
+
+func mapPic(pic database.Picture) *model.Picture {
 	dto := &model.Picture{
 		ID:        int(pic.ID),
 		Path:      pic.Path,
@@ -69,12 +169,11 @@ func (a Api) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Pi
 		CreatedAt: pic.CreatedAt.String(),
 		UpdatedAt: pic.UpdatedAt.String(),
 	}
-
-	return dto, nil
+	return dto
 }
 
 func (a Api) buildQuery(input *model.SearchFilter) *gorm.DB {
-	query := a.db.Session(&gorm.Session{})
+	query := a.db.QueryPictures()
 
 	if input == nil {
 		return query

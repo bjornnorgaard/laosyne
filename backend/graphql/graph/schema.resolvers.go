@@ -23,6 +23,18 @@ func (r *mutationResolver) ScanPath(ctx context.Context) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) AddToRating(ctx context.Context, pictureID int) (*model.Picture, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) ReportMatchResult(ctx context.Context, input model.MatchResult) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *queryResolver) GetPaths(ctx context.Context) ([]*model.Path, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -43,19 +55,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *queryResolver) Paths(ctx context.Context) ([]*model.Path, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *queryResolver) Picture(ctx context.Context, filter string) (*model.Picture, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *queryResolver) Pictures(ctx context.Context) ([]*model.Picture, error) {
-	panic(fmt.Errorf("not implemented"))
-}
