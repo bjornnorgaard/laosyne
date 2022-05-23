@@ -148,7 +148,7 @@ func (a Api) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Pi
 	a.buildQuery(input).Limit(1).First(&pic)
 
 	if pic.ID == 0 {
-		return nil, fmt.Errorf("no picture matches filter: '%s'", input.PathContains)
+		return nil, fmt.Errorf("no picture matches filter: '%s'", *input.PathContains)
 	}
 
 	dto := mapPic(pic)
