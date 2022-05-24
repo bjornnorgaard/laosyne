@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
         body: Container(
           child: Center(
             child: Image.network(
-              "http://10.0.2.2:8080/p?id=3",
+              // "http://10.0.2.2:8080/p?id=3",
+              "http://localhost:8080/p?id=7",
               loadingBuilder: ((context, child, loadingProgress) {
                 return loadingProgress == null
                     ? child
