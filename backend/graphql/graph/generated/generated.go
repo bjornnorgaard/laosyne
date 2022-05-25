@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 		CreateMatch       func(childComplexity int, input *model.SearchFilter) int
 		DeletePath        func(childComplexity int, input model.DeletePath) int
 		ReportMatchResult func(childComplexity int, input model.MatchResult) int
-		ScanPath          func(childComplexity int) int
+		ScanPaths         func(childComplexity int) int
 	}
 
 	Path struct {
@@ -89,7 +89,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	AddPath(ctx context.Context, input model.NewPath) (*model.Path, error)
 	DeletePath(ctx context.Context, input model.DeletePath) (bool, error)
-	ScanPath(ctx context.Context) (bool, error)
+	ScanPaths(ctx context.Context) (bool, error)
 	AddToRating(ctx context.Context, pictureID int) (*model.Picture, error)
 	CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error)
 	ReportMatchResult(ctx context.Context, input model.MatchResult) (bool, error)
@@ -189,12 +189,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ReportMatchResult(childComplexity, args["input"].(model.MatchResult)), true
 
-	case "Mutation.ScanPath":
-		if e.complexity.Mutation.ScanPath == nil {
+	case "Mutation.ScanPaths":
+		if e.complexity.Mutation.ScanPaths == nil {
 			break
 		}
 
-		return e.complexity.Mutation.ScanPath(childComplexity), true
+		return e.complexity.Mutation.ScanPaths(childComplexity), true
 
 	case "Path.createdAt":
 		if e.complexity.Path.CreatedAt == nil {
@@ -417,7 +417,7 @@ input SearchFilter {
 type Mutation {
     AddPath(input: NewPath!): Path!
     DeletePath(input: DeletePath!): Boolean!
-    ScanPath: Boolean!
+    ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
     CreateMatch(input: SearchFilter): Match!
     ReportMatchResult(input: MatchResult!): Boolean!
@@ -883,8 +883,8 @@ func (ec *executionContext) fieldContext_Mutation_DeletePath(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_ScanPath(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_ScanPath(ctx, field)
+func (ec *executionContext) _Mutation_ScanPaths(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_ScanPaths(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -897,7 +897,7 @@ func (ec *executionContext) _Mutation_ScanPath(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ScanPath(rctx)
+		return ec.resolvers.Mutation().ScanPaths(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -914,7 +914,7 @@ func (ec *executionContext) _Mutation_ScanPath(ctx context.Context, field graphq
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_ScanPath(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_ScanPaths(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -4076,10 +4076,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "ScanPath":
+		case "ScanPaths":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_ScanPath(ctx, field)
+				return ec._Mutation_ScanPaths(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {

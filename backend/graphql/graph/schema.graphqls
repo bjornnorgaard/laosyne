@@ -11,7 +11,7 @@ input SearchFilter {
 type Mutation {
     AddPath(input: NewPath!): Path!
     DeletePath(input: DeletePath!): Boolean!
-    ScanPath: Boolean!
+    ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
     CreateMatch(input: SearchFilter): Match!
     ReportMatchResult(input: MatchResult!): Boolean!
