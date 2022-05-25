@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/model"
+	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 	"github.com/bjornnorgaard/laosyne/backend/trueskill"
 )
 
@@ -24,11 +25,11 @@ func (a Api) ReportMatchResult(_ context.Context, input model.MatchResult) (bool
 	playerWinner := trueskill.NewPlayer(winner.Rating, winner.Deviation)
 	playerLoser := trueskill.NewPlayer(loser.Rating, loser.Deviation)
 
-	skills := []trueskill.Player{playerWinner, playerLoser}
-	newSkills, _ := ts.AdjustSkills(skills, false)
+	players := []trueskill.Player{playerWinner, playerLoser}
+	adjustedSkills, _ := ts.AdjustSkills(players, false)
 
-	playerWinner = newSkills[0]
-	playerLoser = newSkills[1]
+	playerWinner = adjustedSkills[0]
+	playerLoser = adjustedSkills[1]
 
 	winner.Rating = playerWinner.Mean()
 	winner.Deviation = playerWinner.Sigma()
@@ -38,6 +39,13 @@ func (a Api) ReportMatchResult(_ context.Context, input model.MatchResult) (bool
 	loser.Deviation = playerLoser.Sigma()
 	loser.Losses++
 
+	result := database.Match{
+		Quality:  ts.MatchQuality(players),
+		WinnerID: winner.ID,
+		LoserID:  loser.ID,
+	}
+
+	a.db.Create(&result)
 	a.db.Save(&winner)
 	a.db.Save(&loser)
 

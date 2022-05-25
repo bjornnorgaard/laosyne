@@ -20,3 +20,12 @@ type Picture struct {
 	Wins      int
 	Losses    int
 }
+
+type Match struct {
+	gorm.Model
+	Quality  float64
+	WinnerID uint
+	Winner   Picture
+	LoserID  uint
+	Loser    Picture
+}

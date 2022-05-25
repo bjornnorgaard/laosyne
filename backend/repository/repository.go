@@ -21,7 +21,7 @@ func NewRepository() Repository {
 		log.Fatal(fmt.Errorf("failed to open database connection, %w", err))
 	}
 
-	err = db.AutoMigrate(&database.Picture{}, &database.Path{})
+	err = db.AutoMigrate(&database.Picture{}, &database.Path{}, &database.Match{})
 	if err != nil {
 		log.Fatal(fmt.Errorf("failed to migrate database: %w", err))
 	}
