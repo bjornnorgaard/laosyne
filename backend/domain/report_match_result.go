@@ -9,7 +9,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/trueskill"
 )
 
-func (a Api) ReportMatchResult(_ context.Context, input model.MatchResult) (bool, error) {
+func (a API) ReportMatchResult(_ context.Context, input model.MatchResult) (bool, error) {
 	winner, err := a.db.FindByID(input.WinnerID)
 	if err != nil {
 		return false, fmt.Errorf("no picture with winner ID %d", input.WinnerID)

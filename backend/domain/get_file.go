@@ -7,7 +7,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a Api) GetFile() http.Handler {
+func (a API) GetFile() http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		id := request.URL.Query()["id"]
 		if len(id) != 1 {

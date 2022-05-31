@@ -8,7 +8,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a Api) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Picture, error) {
+func (a API) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Picture, error) {
 	var pic database.Picture
 	a.buildQuery(input).Limit(1).First(&pic)
 
