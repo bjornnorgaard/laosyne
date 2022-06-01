@@ -17,7 +17,7 @@ func (a Api) ReportMatchResult(_ context.Context, input model.MatchResult) (bool
 
 	loser, err := a.db.FindByID(input.LoserID)
 	if err != nil {
-		return false, fmt.Errorf("no picture with loser ID %d", input.WinnerID)
+		return false, fmt.Errorf("no picture with loser ID %d", input.LoserID)
 	}
 
 	ts := trueskill.New(trueskill.DrawProbabilityZero())
