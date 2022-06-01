@@ -7,27 +7,44 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Container(
-          child: Center(
-            child: Image.network(
-              // "http://10.0.2.2:8080/p?id=3",
-              "http://localhost:8080/p?id=7",
-              loadingBuilder: ((context, child, loadingProgress) {
-                return loadingProgress == null
-                    ? child
-                    : const CircularProgressIndicator();
-              }),
-              height: 700,
-              width: 700,
-              fit: BoxFit.fitWidth,
-            ),
+        body: Center(
+          child: Row(
+            children: const [
+              Picture(id: 3),
+              Picture(id: 6),
+            ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class Picture extends StatelessWidget {
+  final String api = "http://localhost:8080";
+  final int id;
+
+  const Picture({
+    required this.id,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Image.network(
+        "$api/p?id=$id",
+        loadingBuilder: ((context, child, loadingProgress) {
+          if (loadingProgress != null) {
+            return const CircularProgressIndicator();
+          }
+          return child;
+        }),
+        fit: BoxFit.fitWidth,
       ),
     );
   }
