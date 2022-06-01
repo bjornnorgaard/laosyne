@@ -18,7 +18,7 @@ const (
 	defaultPort = "8080"
 )
 
-func Start(api *domain.Api) {
+func Start(api *domain.API) {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort

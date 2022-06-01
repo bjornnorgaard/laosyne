@@ -5,20 +5,20 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository"
 )
 
-type Api struct {
+type API struct {
 	db repository.Repository
 }
 
-func (a Api) Mutation() generated.MutationResolver {
+func (a API) Mutation() generated.MutationResolver {
 	return a
 }
 
-func (a Api) Query() generated.QueryResolver {
+func (a API) Query() generated.QueryResolver {
 	return a
 }
 
-func NewApi(r repository.Repository) *Api {
-	return &Api{
+func NewApi(r repository.Repository) *API {
+	return &API{
 		db: r,
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/trueskill"
 )
 
-func (a Api) AddToRating(_ context.Context, pictureID int) (*model.Picture, error) {
+func (a API) AddToRating(_ context.Context, pictureID int) (*model.Picture, error) {
 	var pic database.Picture
 	a.db.First(&pic, pictureID)
 	if pic.ID == 0 {

@@ -25,7 +25,7 @@ func mapPic(pic database.Picture) *model.Picture {
 	return dto
 }
 
-func (a Api) buildQuery(input *model.SearchFilter) *gorm.DB {
+func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 	query := a.db.QueryPictures()
 
 	if input == nil {

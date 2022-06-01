@@ -7,7 +7,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a Api) GetPictures(_ context.Context, input *model.SearchFilter) ([]*model.Picture, error) {
+func (a API) GetPictures(_ context.Context, input *model.SearchFilter) ([]*model.Picture, error) {
 	var pics []database.Picture
 	a.buildQuery(input).Limit(100).Find(&pics)
 

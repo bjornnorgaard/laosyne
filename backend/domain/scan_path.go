@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (a Api) ScanPaths(ctx context.Context) (bool, error) {
+func (a API) ScanPaths(ctx context.Context) (bool, error) {
 	var paths []database.Path
 	a.db.Find(&paths)
 
@@ -26,7 +26,7 @@ func (a Api) ScanPaths(ctx context.Context) (bool, error) {
 	return true, nil
 }
 
-func (a Api) scanFolder(ctx context.Context, path string) {
+func (a API) scanFolder(ctx context.Context, path string) {
 	//goland:noinspection ALL
 	if runtime.GOOS != "windows" {
 		path = strings.Replace(path, "\\", "/", -1)
@@ -72,7 +72,7 @@ func (a Api) scanFolder(ctx context.Context, path string) {
 	a.db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(&pictures, 50)
 }
 
-func (a *Api) removeDeletedMedia() {
+func (a *API) removeDeletedMedia() {
 	var (
 		limit        = 100
 		offset       = 0
