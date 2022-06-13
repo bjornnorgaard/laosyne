@@ -5,6 +5,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  final int cId = 3;
+  final int oId = 6;
+
   const MyApp({Key? key}) : super(key: key);
 
   @override
@@ -13,9 +16,9 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Center(
           child: Row(
-            children: const [
-              Picture(id: 3),
-              Picture(id: 6),
+            children: [
+              Picture(id: cId),
+              Picture(id: oId),
             ],
           ),
         ),
