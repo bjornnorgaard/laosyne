@@ -1,27 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final int cId = 3;
-  final int oId = 6;
-
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Row(
-            children: [
-              Picture(id: cId),
-              Picture(id: oId),
-            ],
-          ),
+    const cId = 3;
+    const oId = 6;
+
+    final httpLink = HttpLink(
+      "http://localhost:8080/graphql",
+    );
+
+    ValueNotifier<GraphQLClient> client = ValueNotifier(
+      GraphQLClient(
+        link: httpLink,
+        cache: GraphQLCache(
+          store: InMemoryStore(),
         ),
+      ),
+    );
+
+    return GraphQLProvider(
+        client: client,
+        child: MaterialApp(
+          title: 'GraphQL Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: const Match(
+            cId: cId,
+            oId: oId,
+          ),
+        ));
+  }
+}
+
+class Match extends StatelessWidget {
+  const Match({
+    Key? key,
+    required this.cId,
+    required this.oId,
+  }) : super(key: key);
+
+  final int cId;
+  final int oId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Row(
+        children: [
+          Picture(id: cId),
+          Picture(id: oId),
+        ],
       ),
     );
   }
