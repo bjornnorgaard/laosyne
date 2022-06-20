@@ -53,8 +53,7 @@ func (a API) scanFolder(ctx context.Context, path string) {
 			continue
 		}
 
-		validExtension := lo.Contains(extensions, ext)
-		if !validExtension {
+		if !lo.Contains(extensions, ext) {
 			continue
 		}
 
