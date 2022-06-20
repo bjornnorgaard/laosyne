@@ -67,7 +67,6 @@ func (a API) scanFolder(ctx context.Context, path string) {
 		return
 	}
 
-	// a.db.Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "path"}}, DoNothing: true}).Create(&pictures)
 	a.db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(&pictures, 50)
 }
 
