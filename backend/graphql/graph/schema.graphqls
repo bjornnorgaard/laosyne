@@ -1,7 +1,8 @@
-type Query {
+ type Query {
     GetPaths: [Path!]!
     GetPicture(input: SearchFilter): Picture!
     GetPictures(input: SearchFilter): [Picture!]!
+    CreateMatch(input: SearchFilter): Match!
 }
 
 input SearchFilter {
@@ -13,7 +14,6 @@ type Mutation {
     DeletePath(input: DeletePath!): Boolean!
     ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
-    CreateMatch(input: SearchFilter): Match!
     ReportMatchResult(input: MatchResult!): Boolean!
 }
 
