@@ -83,7 +83,7 @@ type ComplexityRoot struct {
 	Query struct {
 		CreateMatch func(childComplexity int, input *model.SearchFilter) int
 		GetPaths    func(childComplexity int) int
-		GetPicture  func(childComplexity int, input *model.SearchFilter) int
+		GetPicture  func(childComplexity int, pictureID int) int
 		GetPictures func(childComplexity int, input *model.SearchFilter) int
 	}
 }
@@ -99,7 +99,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	GetPaths(ctx context.Context) ([]*model.Path, error)
-	GetPicture(ctx context.Context, input *model.SearchFilter) (*model.Picture, error)
+	GetPicture(ctx context.Context, pictureID int) (*model.Picture, error)
 	GetPictures(ctx context.Context, input *model.SearchFilter) ([]*model.Picture, error)
 	CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error)
 }
@@ -346,7 +346,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPicture(childComplexity, args["input"].(*model.SearchFilter)), true
+		return e.complexity.Query.GetPicture(childComplexity, args["pictureId"].(int)), true
 
 	case "Query.GetPictures":
 		if e.complexity.Query.GetPictures == nil {
@@ -432,11 +432,11 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: ` type Query {
+	{Name: "graph/schema.graphqls", Input: `type Query {
     GetPaths: [Path!]!
-    GetPicture(input: SearchFilter): Picture!
-     GetPictures(input: SearchFilter): [Picture!]
-     CreateMatch(input: SearchFilter): Match!
+    GetPicture(pictureId: Int!): Picture!
+    GetPictures(input: SearchFilter): [Picture!]
+    CreateMatch(input: SearchFilter): Match!
 }
 
 input SearchFilter {
@@ -448,11 +448,11 @@ input SearchFilter {
     sortOrder: SortOrder
 }
 
- enum SortOrder {
-     RANDOM
-     RATING_DESC
-     RATING_ASC
- }
+enum SortOrder {
+    RANDOM
+    RATING_DESC
+    RATING_ASC
+}
 
 type Mutation {
     AddPath(input: NewPath!): Path!
@@ -617,15 +617,15 @@ func (ec *executionContext) field_Query_CreateMatch_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_GetPicture_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.SearchFilter
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["pictureId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pictureId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["pictureId"] = arg0
 	return args, nil
 }
 
@@ -1969,7 +1969,7 @@ func (ec *executionContext) _Query_GetPicture(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetPicture(rctx, fc.Args["input"].(*model.SearchFilter))
+		return ec.resolvers.Query().GetPicture(rctx, fc.Args["pictureId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

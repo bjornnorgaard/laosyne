@@ -1,34 +1,34 @@
- type Query {
+type Query {
     GetPaths: [Path!]!
-    GetPicture(input: SearchFilter): Picture!
-     GetPictures(input: SearchFilter): [Picture!]
-     CreateMatch(input: SearchFilter): Match!
+    GetPicture(pictureId: Int!): Picture!
+    GetPictures(input: SearchFilter): [Picture!]
+    CreateMatch(input: SearchFilter): Match!
 }
 
- input SearchFilter {
-     take: Int
-     skip: Int
-     pathContains: String
-     upperRating: Int
-     lowerRating: Int
-     sortOrder: SortOrder
- }
+input SearchFilter {
+    take: Int
+    skip: Int
+    pathContains: String
+    upperRating: Int
+    lowerRating: Int
+    sortOrder: SortOrder
+}
 
- enum SortOrder {
-     RANDOM
-     RATING_DESC
-     RATING_ASC
- }
+enum SortOrder {
+    RANDOM
+    RATING_DESC
+    RATING_ASC
+}
 
- type Mutation {
-     AddPath(input: NewPath!): Path!
-     DeletePath(pathId: Int!): Boolean!
-     ScanPaths: Boolean!
-     AddToRating(pictureId: Int!): Picture!
-     LikePicture(pictureId: Int!): Boolean!
-     DislikePicture(pictureId: Int!): Boolean!
-     ReportMatchResult(input: MatchResult!): Boolean!
- }
+type Mutation {
+    AddPath(input: NewPath!): Path!
+    DeletePath(pathId: Int!): Boolean!
+    ScanPaths: Boolean!
+    AddToRating(pictureId: Int!): Picture!
+    LikePicture(pictureId: Int!): Boolean!
+    DislikePicture(pictureId: Int!): Boolean!
+    ReportMatchResult(input: MatchResult!): Boolean!
+}
 
 input MatchResult {
     winnerId: Int!

@@ -8,12 +8,12 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a API) GetPicture(_ context.Context, input *model.SearchFilter) (*model.Picture, error) {
+func (a API) GetPicture(_ context.Context, pictureID int) (*model.Picture, error) {
 	var pic database.Picture
-	a.buildQuery(input).Limit(1).First(&pic)
+	a.db.First(&pic, pictureID)
 
 	if pic.ID == 0 {
-		return nil, fmt.Errorf("no picture matches filter: '%s'", *input.PathContains)
+		return nil, fmt.Errorf("no picture matches id: '%d'", pictureID)
 	}
 
 	dto := mapPic(pic)
