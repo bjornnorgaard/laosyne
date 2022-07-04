@@ -52,8 +52,9 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AddPath           func(childComplexity int, input model.NewPath) int
 		AddToRating       func(childComplexity int, pictureID int) int
-		CreateMatch       func(childComplexity int, input *model.SearchFilter) int
 		DeletePath        func(childComplexity int, input model.DeletePath) int
+		DislikePicture    func(childComplexity int, pictureID int) int
+		LikePicture       func(childComplexity int, pictureID int) int
 		ReportMatchResult func(childComplexity int, input model.MatchResult) int
 		ScanPaths         func(childComplexity int) int
 	}
@@ -80,6 +81,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		CreateMatch func(childComplexity int, input *model.SearchFilter) int
 		GetPaths    func(childComplexity int) int
 		GetPicture  func(childComplexity int, input *model.SearchFilter) int
 		GetPictures func(childComplexity int, input *model.SearchFilter) int
@@ -91,13 +93,15 @@ type MutationResolver interface {
 	DeletePath(ctx context.Context, input model.DeletePath) (bool, error)
 	ScanPaths(ctx context.Context) (bool, error)
 	AddToRating(ctx context.Context, pictureID int) (*model.Picture, error)
-	CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error)
+	LikePicture(ctx context.Context, pictureID int) (bool, error)
+	DislikePicture(ctx context.Context, pictureID int) (bool, error)
 	ReportMatchResult(ctx context.Context, input model.MatchResult) (bool, error)
 }
 type QueryResolver interface {
 	GetPaths(ctx context.Context) ([]*model.Path, error)
 	GetPicture(ctx context.Context, input *model.SearchFilter) (*model.Picture, error)
 	GetPictures(ctx context.Context, input *model.SearchFilter) ([]*model.Picture, error)
+	CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error)
 }
 
 type executableSchema struct {
@@ -153,18 +157,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddToRating(childComplexity, args["pictureId"].(int)), true
 
-	case "Mutation.CreateMatch":
-		if e.complexity.Mutation.CreateMatch == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_CreateMatch_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateMatch(childComplexity, args["input"].(*model.SearchFilter)), true
-
 	case "Mutation.DeletePath":
 		if e.complexity.Mutation.DeletePath == nil {
 			break
@@ -176,6 +168,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeletePath(childComplexity, args["input"].(model.DeletePath)), true
+
+	case "Mutation.DislikePicture":
+		if e.complexity.Mutation.DislikePicture == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_DislikePicture_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DislikePicture(childComplexity, args["pictureId"].(int)), true
+
+	case "Mutation.LikePicture":
+		if e.complexity.Mutation.LikePicture == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_LikePicture_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.LikePicture(childComplexity, args["pictureId"].(int)), true
 
 	case "Mutation.ReportMatchResult":
 		if e.complexity.Mutation.ReportMatchResult == nil {
@@ -301,6 +317,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Picture.Wins(childComplexity), true
 
+	case "Query.CreateMatch":
+		if e.complexity.Query.CreateMatch == nil {
+			break
+		}
+
+		args, err := ec.field_Query_CreateMatch_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.CreateMatch(childComplexity, args["input"].(*model.SearchFilter)), true
+
 	case "Query.GetPaths":
 		if e.complexity.Query.GetPaths == nil {
 			break
@@ -404,14 +432,17 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphqls", Input: `type Query {
+	{Name: "graph/schema.graphqls", Input: ` type Query {
     GetPaths: [Path!]!
     GetPicture(input: SearchFilter): Picture!
-    GetPictures(input: SearchFilter): [Picture!]!
+    GetPictures(input: SearchFilter): [Picture!]
+    CreateMatch(input: SearchFilter): Match!
 }
 
 input SearchFilter {
     pathContains: String
+    upperRating: Int
+    lowerRating: Int
 }
 
 type Mutation {
@@ -419,7 +450,8 @@ type Mutation {
     DeletePath(input: DeletePath!): Boolean!
     ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
-    CreateMatch(input: SearchFilter): Match!
+    LikePicture(pictureId: Int!): Boolean!
+    DislikePicture(pictureId: Int!): Boolean!
     ReportMatchResult(input: MatchResult!): Boolean!
 }
 
@@ -460,8 +492,7 @@ type Picture {
     losses:    Int!
     createdAt:   String!
     updatedAt:   String!
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -499,21 +530,6 @@ func (ec *executionContext) field_Mutation_AddToRating_args(ctx context.Context,
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_CreateMatch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *model.SearchFilter
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -529,6 +545,36 @@ func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_DislikePicture_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["pictureId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pictureId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pictureId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_LikePicture_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["pictureId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pictureId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pictureId"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_ReportMatchResult_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -536,6 +582,21 @@ func (ec *executionContext) field_Mutation_ReportMatchResult_args(ctx context.Co
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNMatchResult2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐMatchResult(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_CreateMatch_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *model.SearchFilter
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1006,8 +1067,8 @@ func (ec *executionContext) fieldContext_Mutation_AddToRating(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_CreateMatch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_CreateMatch(ctx, field)
+func (ec *executionContext) _Mutation_LikePicture(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_LikePicture(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1020,7 +1081,7 @@ func (ec *executionContext) _Mutation_CreateMatch(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateMatch(rctx, fc.Args["input"].(*model.SearchFilter))
+		return ec.resolvers.Mutation().LikePicture(rctx, fc.Args["pictureId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1032,25 +1093,19 @@ func (ec *executionContext) _Mutation_CreateMatch(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Match)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNMatch2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐMatch(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_CreateMatch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_LikePicture(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "playerOne":
-				return ec.fieldContext_Match_playerOne(ctx, field)
-			case "playerTwo":
-				return ec.fieldContext_Match_playerTwo(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Match", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -1060,7 +1115,62 @@ func (ec *executionContext) fieldContext_Mutation_CreateMatch(ctx context.Contex
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_CreateMatch_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_LikePicture_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_DislikePicture(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_DislikePicture(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DislikePicture(rctx, fc.Args["pictureId"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_DislikePicture(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_DislikePicture_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -1936,14 +2046,11 @@ func (ec *executionContext) _Query_GetPictures(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]*model.Picture)
 	fc.Result = res
-	return ec.marshalNPicture2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPictureᚄ(ctx, field.Selections, res)
+	return ec.marshalOPicture2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPictureᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_GetPictures(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1988,6 +2095,67 @@ func (ec *executionContext) fieldContext_Query_GetPictures(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_GetPictures_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_CreateMatch(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_CreateMatch(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().CreateMatch(rctx, fc.Args["input"].(*model.SearchFilter))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Match)
+	fc.Result = res
+	return ec.marshalNMatch2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐMatch(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_CreateMatch(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "playerOne":
+				return ec.fieldContext_Match_playerOne(ctx, field)
+			case "playerTwo":
+				return ec.fieldContext_Match_playerTwo(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Match", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_CreateMatch_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -3990,6 +4158,22 @@ func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj 
 			if err != nil {
 				return it, err
 			}
+		case "upperRating":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("upperRating"))
+			it.UpperRating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "lowerRating":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lowerRating"))
+			it.LowerRating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -4094,10 +4278,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "CreateMatch":
+		case "LikePicture":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_CreateMatch(ctx, field)
+				return ec._Mutation_LikePicture(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "DislikePicture":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_DislikePicture(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -4345,6 +4538,26 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_GetPictures(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "CreateMatch":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_CreateMatch(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -4835,50 +5048,6 @@ func (ec *executionContext) marshalNPicture2githubᚗcomᚋbjornnorgaardᚋlaosy
 	return ec._Picture(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPicture2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPictureᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Picture) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx context.Context, sel ast.SelectionSet, v *model.Picture) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5181,6 +5350,69 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
+	return res
+}
+
+func (ec *executionContext) marshalOPicture2ᚕᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPictureᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Picture) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSearchFilter(ctx context.Context, v interface{}) (*model.SearchFilter, error) {

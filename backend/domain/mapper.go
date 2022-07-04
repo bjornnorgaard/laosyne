@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bjornnorgaard/laosyne/backend/graphql/graph/model"
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
@@ -33,7 +34,17 @@ func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 	}
 
 	if input.PathContains != nil {
-		query = query.Where("path LIKE ?", fmt.Sprintf("%%%s%%", *input.PathContains))
+		for _, s := range strings.Split(*input.PathContains, " ") {
+			query = query.Where("path LIKE ?", fmt.Sprintf("%%%s%%", s))
+		}
+	}
+
+	if input.LowerRating != nil {
+		query = query.Where("? < rating", input.LowerRating)
+	}
+
+	if input.UpperRating != nil {
+		query = query.Where("rating < ?", input.UpperRating)
 	}
 
 	return query

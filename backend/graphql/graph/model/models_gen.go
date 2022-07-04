@@ -43,4 +43,6 @@ type Picture struct {
 
 type SearchFilter struct {
 	PathContains *string `json:"pathContains"`
+	UpperRating  *int    `json:"upperRating"`
+	LowerRating  *int    `json:"lowerRating"`
 }

@@ -27,7 +27,11 @@ func (r *mutationResolver) AddToRating(ctx context.Context, pictureID int) (*mod
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error) {
+func (r *mutationResolver) LikePicture(ctx context.Context, pictureID int) (bool, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DislikePicture(ctx context.Context, pictureID int) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -47,6 +51,10 @@ func (r *queryResolver) GetPictures(ctx context.Context, input *model.SearchFilt
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *queryResolver) CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -62,6 +70,12 @@ type queryResolver struct{ *Resolver }
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *queryResolver) GetLeaderboard(ctx context.Context, input *model.SearchFilter) ([]*model.Picture, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *mutationResolver) CreateMatch(ctx context.Context, input *model.SearchFilter) (*model.Match, error) {
+	panic(fmt.Errorf("not implemented"))
+}
 func (r *mutationResolver) ScanPath(ctx context.Context) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }

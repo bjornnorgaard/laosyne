@@ -1,12 +1,14 @@
  type Query {
     GetPaths: [Path!]!
     GetPicture(input: SearchFilter): Picture!
-    GetPictures(input: SearchFilter): [Picture!]!
-    CreateMatch(input: SearchFilter): Match!
+     GetPictures(input: SearchFilter): [Picture!]
+     CreateMatch(input: SearchFilter): Match!
 }
 
 input SearchFilter {
     pathContains: String
+    upperRating: Int
+    lowerRating: Int
 }
 
 type Mutation {
@@ -14,6 +16,8 @@ type Mutation {
     DeletePath(input: DeletePath!): Boolean!
     ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
+    LikePicture(pictureId: Int!): Boolean!
+    DislikePicture(pictureId: Int!): Boolean!
     ReportMatchResult(input: MatchResult!): Boolean!
 }
 
