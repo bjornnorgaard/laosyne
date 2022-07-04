@@ -27,10 +27,21 @@ func mapPic(pic database.Picture) *model.Picture {
 }
 
 func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
-	query := a.db.QueryPictures()
+	query := a.db.QueryPictures().Limit(100)
 
 	if input == nil {
 		return query
+	}
+
+	switch *input.SortOrder {
+	case model.SortOrderRandom:
+		query = query.Order("RANDOM()")
+	case model.SortOrderRatingDesc:
+		query = query.Order("rating desc")
+	case model.SortOrderRatingAsc:
+		query = query.Order("rating asc")
+	default:
+		query = query.Order("id")
 	}
 
 	if input.PathContains != nil {
@@ -45,6 +56,14 @@ func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 
 	if input.UpperRating != nil {
 		query = query.Where("rating < ?", input.UpperRating)
+	}
+
+	if input.Skip != nil {
+		query = query.Offset(*input.Skip)
+	}
+
+	if input.Take != nil {
+		query = query.Limit(*input.Take)
 	}
 
 	return query

@@ -9,7 +9,7 @@ import (
 
 func (a API) GetPictures(_ context.Context, input *model.SearchFilter) ([]*model.Picture, error) {
 	var pics []database.Picture
-	a.buildQuery(input).Limit(100).Find(&pics)
+	a.buildQuery(input).Find(&pics)
 
 	var dto []*model.Picture
 	for _, p := range pics {

@@ -5,21 +5,30 @@
      CreateMatch(input: SearchFilter): Match!
 }
 
-input SearchFilter {
-    pathContains: String
-    upperRating: Int
-    lowerRating: Int
-}
+ input SearchFilter {
+     take: Int
+     skip: Int
+     pathContains: String
+     upperRating: Int
+     lowerRating: Int
+     sortOrder: SortOrder
+ }
 
-type Mutation {
-    AddPath(input: NewPath!): Path!
-    DeletePath(input: DeletePath!): Boolean!
-    ScanPaths: Boolean!
-    AddToRating(pictureId: Int!): Picture!
-    LikePicture(pictureId: Int!): Boolean!
-    DislikePicture(pictureId: Int!): Boolean!
-    ReportMatchResult(input: MatchResult!): Boolean!
-}
+ enum SortOrder {
+     RANDOM
+     RATING_DESC
+     RATING_ASC
+ }
+
+ type Mutation {
+     AddPath(input: NewPath!): Path!
+     DeletePath(pathId: Int!): Boolean!
+     ScanPaths: Boolean!
+     AddToRating(pictureId: Int!): Picture!
+     LikePicture(pictureId: Int!): Boolean!
+     DislikePicture(pictureId: Int!): Boolean!
+     ReportMatchResult(input: MatchResult!): Boolean!
+ }
 
 input MatchResult {
     winnerId: Int!

@@ -52,7 +52,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		AddPath           func(childComplexity int, input model.NewPath) int
 		AddToRating       func(childComplexity int, pictureID int) int
-		DeletePath        func(childComplexity int, input model.DeletePath) int
+		DeletePath        func(childComplexity int, pathID int) int
 		DislikePicture    func(childComplexity int, pictureID int) int
 		LikePicture       func(childComplexity int, pictureID int) int
 		ReportMatchResult func(childComplexity int, input model.MatchResult) int
@@ -90,7 +90,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	AddPath(ctx context.Context, input model.NewPath) (*model.Path, error)
-	DeletePath(ctx context.Context, input model.DeletePath) (bool, error)
+	DeletePath(ctx context.Context, pathID int) (bool, error)
 	ScanPaths(ctx context.Context) (bool, error)
 	AddToRating(ctx context.Context, pictureID int) (*model.Picture, error)
 	LikePicture(ctx context.Context, pictureID int) (bool, error)
@@ -167,7 +167,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeletePath(childComplexity, args["input"].(model.DeletePath)), true
+		return e.complexity.Mutation.DeletePath(childComplexity, args["pathId"].(int)), true
 
 	case "Mutation.DislikePicture":
 		if e.complexity.Mutation.DislikePicture == nil {
@@ -435,19 +435,28 @@ var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: ` type Query {
     GetPaths: [Path!]!
     GetPicture(input: SearchFilter): Picture!
-    GetPictures(input: SearchFilter): [Picture!]
-    CreateMatch(input: SearchFilter): Match!
+     GetPictures(input: SearchFilter): [Picture!]
+     CreateMatch(input: SearchFilter): Match!
 }
 
 input SearchFilter {
+    take: Int
+    skip: Int
     pathContains: String
     upperRating: Int
     lowerRating: Int
+    sortOrder: SortOrder
 }
+
+ enum SortOrder {
+     RANDOM
+     RATING_DESC
+     RATING_ASC
+ }
 
 type Mutation {
     AddPath(input: NewPath!): Path!
-    DeletePath(input: DeletePath!): Boolean!
+    DeletePath(pathId: Int!): Boolean!
     ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
     LikePicture(pictureId: Int!): Boolean!
@@ -533,15 +542,15 @@ func (ec *executionContext) field_Mutation_AddToRating_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_DeletePath_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.DeletePath
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["pathId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pathId"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["pathId"] = arg0
 	return args, nil
 }
 
@@ -903,7 +912,7 @@ func (ec *executionContext) _Mutation_DeletePath(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeletePath(rctx, fc.Args["input"].(model.DeletePath))
+		return ec.resolvers.Mutation().DeletePath(rctx, fc.Args["pathId"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4150,6 +4159,22 @@ func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj 
 
 	for k, v := range asMap {
 		switch k {
+		case "take":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("take"))
+			it.Take, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "skip":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("skip"))
+			it.Skip, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "pathContains":
 			var err error
 
@@ -4171,6 +4196,14 @@ func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lowerRating"))
 			it.LowerRating, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sortOrder":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sortOrder"))
+			it.SortOrder, err = ec.unmarshalOSortOrder2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSortOrder(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4927,11 +4960,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNDeletePath2githubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐDeletePath(ctx context.Context, v interface{}) (model.DeletePath, error) {
-	res, err := ec.unmarshalInputDeletePath(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	res, err := graphql.UnmarshalFloatContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5421,6 +5449,22 @@ func (ec *executionContext) unmarshalOSearchFilter2ᚖgithubᚗcomᚋbjornnorgaa
 	}
 	res, err := ec.unmarshalInputSearchFilter(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOSortOrder2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSortOrder(ctx context.Context, v interface{}) (*model.SortOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.SortOrder)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOSortOrder2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐSortOrder(ctx context.Context, sel ast.SelectionSet, v *model.SortOrder) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

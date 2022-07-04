@@ -15,7 +15,7 @@ func (r *mutationResolver) AddPath(ctx context.Context, input model.NewPath) (*m
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeletePath(ctx context.Context, input model.DeletePath) (bool, error) {
+func (r *mutationResolver) DeletePath(ctx context.Context, pathID int) (bool, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
