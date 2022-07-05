@@ -33,15 +33,15 @@ func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 		return query
 	}
 
-	switch *input.SortOrder {
-	case model.SortOrderRandom:
-		query = query.Order("RANDOM()")
-	case model.SortOrderRatingDesc:
-		query = query.Order("rating desc")
-	case model.SortOrderRatingAsc:
-		query = query.Order("rating asc")
-	default:
-		query = query.Order("id")
+	if input.SortOrder != nil {
+		switch *input.SortOrder {
+		case model.SortOrderRandom:
+			query = query.Order("RANDOM()")
+		case model.SortOrderRatingDesc:
+			query = query.Order("rating desc")
+		case model.SortOrderRatingAsc:
+			query = query.Order("rating asc")
+		}
 	}
 
 	if input.PathContains != nil {
