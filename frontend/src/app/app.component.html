@@ -1,9 +1,11 @@
 <div *ngIf="loading">
   Loading...
 </div>
+
 <div *ngIf="error">
   Error :(
 </div>
+
 <div *ngIf="pictures$">
   <div *ngFor="let pic of pictures$ | async">
     <p>{{ pic.path }}</p>
