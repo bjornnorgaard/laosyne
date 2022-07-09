@@ -17,7 +17,6 @@ const GetPictures = gql`
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-
   loading = true;
   error: any;
   pictures$: Observable<Picture[]> = of([]);
