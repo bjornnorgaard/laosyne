@@ -3,8 +3,8 @@ name: Ng
 on:
   push:
     branches: [ main ]
-#    paths:
-#      - 'frontend/**'
+    paths:
+      - 'frontend/**'
   pull_request:
     branches: [ main ]
     paths:
