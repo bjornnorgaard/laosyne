@@ -3,8 +3,8 @@ name: Ng
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'frontend/**'
+#    paths:
+#      - 'frontend/**'
   pull_request:
     branches: [ main ]
     paths:
@@ -13,6 +13,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
 
     strategy:
       matrix:
@@ -20,18 +23,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
-          entrypoint: frontend
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
       - name: NPM Install
-        working-directory: frontend
         run: npm ci
 
       - name: Build
-        working-directory: frontend
         run: npm run build
