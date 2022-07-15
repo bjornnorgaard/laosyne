@@ -1,15 +1,7 @@
-import {Component} from '@angular/core';
-import {Apollo, gql} from "apollo-angular";
-import {map, Observable, of, tap} from "rxjs";
-import {Picture} from "./models";
-
-const GetPictures = gql`
-  query GetPictures {
-    GetPictures {
-      id, path
-    }
-  }
-`
+import { Component } from '@angular/core';
+import { map, Observable, of, tap } from "rxjs";
+import { Picture } from "./models";
+import { GetPicturesGQL } from "../generated/graphql";
 
 @Component({
   selector: 'app-root',
@@ -22,11 +14,11 @@ export class AppComponent {
   error: any;
   pictures$: Observable<Picture[]> = of([]);
 
-  constructor(private apollo: Apollo) {
+  constructor(private query: GetPicturesGQL) {
   }
 
   ngOnInit() {
-    this.pictures$ = this.apollo.watchQuery<any>({query: GetPictures}).valueChanges.pipe(
+    this.pictures$ = this.query.watch().valueChanges.pipe(
       tap(res => this.loading = res.loading),
       tap(res => this.error = res.error),
       map(res => res.data.GetPictures),
