@@ -136,17 +136,27 @@ export enum SortOrder {
   RatingDesc = 'RATING_DESC'
 }
 
-export type GetPicturesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GetPictureDetailsQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
 
 
-export type GetPicturesQuery = { __typename?: 'Query', GetPictures?: Array<{ __typename?: 'Picture', id: number, path: string, rating: number }> | null };
+export type GetPictureDetailsQuery = { __typename?: 'Query', GetPicture: { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
 
-export const GetPicturesDocument = gql`
-    query GetPictures {
-  GetPictures {
+export const GetPictureDetailsDocument = gql`
+    query GetPictureDetails($id: Int!) {
+  GetPicture(pictureId: $id) {
     id
     path
+    ext
+    views
+    likes
+    losses
+    wins
     rating
+    deviation
+    updatedAt
+    createdAt
   }
 }
     `;
@@ -154,8 +164,8 @@ export const GetPicturesDocument = gql`
   @Injectable({
     providedIn: 'root'
   })
-  export class GetPicturesGQL extends Apollo.Query<GetPicturesQuery, GetPicturesQueryVariables> {
-    document = GetPicturesDocument;
+  export class GetPictureDetailsGQL extends Apollo.Query<GetPictureDetailsQuery, GetPictureDetailsQueryVariables> {
+    document = GetPictureDetailsDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
