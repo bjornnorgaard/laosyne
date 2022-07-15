@@ -1,0 +1,77 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Match {
+    playerOne: Picture!
+    playerTwo: Picture!
+}
+
+type Mutation {
+    AddPath(input: NewPath!): Path!
+    AddToRating(pictureId: Int!): Picture!
+    DeletePath(pathId: Int!): Boolean!
+    DislikePicture(pictureId: Int!): Boolean!
+    LikePicture(pictureId: Int!): Boolean!
+    ReportMatchResult(input: MatchResult!): Boolean!
+    ScanPaths: Boolean!
+}
+
+type Path {
+    createdAt: String!
+    id: Int!
+    path: String!
+    updatedAt: String!
+}
+
+type Picture {
+    createdAt: String!
+    deviation: Float!
+    ext: String!
+    id: Int!
+    likes: Int!
+    losses: Int!
+    path: String!
+    rating: Float!
+    updatedAt: String!
+    views: Int!
+    wins: Int!
+}
+
+type Query {
+    CreateMatch(input: SearchFilter): Match!
+    GetPaths: [Path!]!
+    GetPicture(pictureId: Int!): Picture!
+    GetPictures(input: SearchFilter): [Picture!]
+}
+
+enum SortOrder {
+    RANDOM
+    RATING_ASC
+    RATING_DESC
+}
+
+input DeletePath {
+    pathId: Int!
+}
+
+input MatchResult {
+    loserId: Int!
+    winnerId: Int!
+}
+
+input NewPath {
+    path: String!
+}
+
+input SearchFilter {
+    lowerRating: Int
+    pathContains: String
+    skip: Int
+    sortOrder: SortOrder
+    take: Int
+    upperRating: Int
+}
