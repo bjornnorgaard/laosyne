@@ -3,11 +3,17 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from "@angular/material/card";
 import { MatButtonModule } from "@angular/material/button";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MatChipsModule } from "@angular/material/chips";
+import { MatExpansionModule } from "@angular/material/expansion";
+import { MatDividerModule } from "@angular/material/divider";
 
 const modules = [
   MatCardModule,
   MatButtonModule,
   MatProgressBarModule,
+  MatChipsModule,
+  MatExpansionModule,
+  MatDividerModule,
 ]
 
 @NgModule({

@@ -681,7 +681,7 @@
         "description": null,
         "fields": [
           {
-            "name": "CreateMatch",
+            "name": "Match",
             "description": null,
             "args": [
               {
@@ -710,7 +710,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GetPaths",
+            "name": "Paths",
             "description": null,
             "args": [],
             "type": {
@@ -734,7 +734,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GetPicture",
+            "name": "Picture",
             "description": null,
             "args": [
               {
@@ -767,7 +767,7 @@
             "deprecationReason": null
           },
           {
-            "name": "GetPictures",
+            "name": "Pictures",
             "description": null,
             "args": [
               {

@@ -42,10 +42,10 @@ type Picture {
 }
 
 type Query {
-    CreateMatch(input: SearchFilter): Match!
-    GetPaths: [Path!]!
-    GetPicture(pictureId: Int!): Picture!
-    GetPictures(input: SearchFilter): [Picture!]
+  Match(input: SearchFilter): Match!
+  Paths: [Path!]!
+  Picture(pictureId: Int!): Picture!
+  Pictures(input: SearchFilter): [Picture!]
 }
 
 enum SortOrder {

@@ -1,8 +1,7 @@
-query GetPictureDetails($id: Int!) {
-  GetPicture(pictureId: $id) {
+query PictureDetails($id: Int!) {
+  Picture(pictureId: $id) {
     id
     path
-    ext
     views
     likes
     losses

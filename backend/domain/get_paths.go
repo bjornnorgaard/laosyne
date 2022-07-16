@@ -7,7 +7,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a API) GetPaths(_ context.Context) ([]*model.Path, error) {
+func (a API) Paths(_ context.Context) ([]*model.Path, error) {
 	var paths []database.Path
 	a.db.Find(&paths)
 

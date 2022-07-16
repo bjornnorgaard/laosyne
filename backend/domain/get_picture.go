@@ -8,7 +8,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a API) GetPicture(_ context.Context, pictureID int) (*model.Picture, error) {
+func (a API) Picture(_ context.Context, pictureID int) (*model.Picture, error) {
 	var pic database.Picture
 	a.db.First(&pic, pictureID)
 

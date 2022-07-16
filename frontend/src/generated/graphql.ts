@@ -1,6 +1,7 @@
+import * as Apollo from 'apollo-angular';
 import { gql } from 'apollo-angular';
 import { Injectable } from '@angular/core';
-import * as Apollo from 'apollo-angular';
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -100,24 +101,24 @@ export type Picture = {
 
 export type Query = {
   __typename?: 'Query';
-  CreateMatch: Match;
-  GetPaths: Array<Path>;
-  GetPicture: Picture;
-  GetPictures?: Maybe<Array<Picture>>;
+  Match: Match;
+  Paths: Array<Path>;
+  Picture: Picture;
+  Pictures?: Maybe<Array<Picture>>;
 };
 
 
-export type QueryCreateMatchArgs = {
+export type QueryMatchArgs = {
   input?: InputMaybe<SearchFilter>;
 };
 
 
-export type QueryGetPictureArgs = {
+export type QueryPictureArgs = {
   pictureId: Scalars['Int'];
 };
 
 
-export type QueryGetPicturesArgs = {
+export type QueryPicturesArgs = {
   input?: InputMaybe<SearchFilter>;
 };
 
@@ -136,38 +137,37 @@ export enum SortOrder {
   RatingDesc = 'RATING_DESC'
 }
 
-export type GetPictureDetailsQueryVariables = Exact<{
+export type PictureDetailsQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
 
 
-export type GetPictureDetailsQuery = { __typename?: 'Query', GetPicture: { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
+export type PictureDetailsQuery = { __typename?: 'Query', Picture: { __typename?: 'Picture', id: number, path: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
 
-export const GetPictureDetailsDocument = gql`
-    query GetPictureDetails($id: Int!) {
-  GetPicture(pictureId: $id) {
-    id
-    path
-    ext
-    views
-    likes
-    losses
-    wins
-    rating
-    deviation
-    updatedAt
-    createdAt
+export const PictureDetailsDocument = gql`
+  query PictureDetails($id: Int!) {
+    Picture(pictureId: $id) {
+      id
+      path
+      views
+      likes
+      losses
+      wins
+      rating
+      deviation
+      updatedAt
+      createdAt
+    }
+}
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, PictureDetailsQueryVariables> {
+  document = PictureDetailsDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
   }
 }
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class GetPictureDetailsGQL extends Apollo.Query<GetPictureDetailsQuery, GetPictureDetailsQueryVariables> {
-    document = GetPictureDetailsDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }

@@ -1,8 +1,8 @@
 type Query {
-    GetPaths: [Path!]!
-    GetPicture(pictureId: Int!): Picture!
-    GetPictures(input: SearchFilter): [Picture!]
-    CreateMatch(input: SearchFilter): Match!
+    Paths: [Path!]!
+    Picture(pictureId: Int!): Picture!
+    Pictures(input: SearchFilter): [Picture!]
+    Match(input: SearchFilter): Match!
 }
 
 input SearchFilter {

@@ -8,7 +8,7 @@ import (
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
 
-func (a API) CreateMatch(_ context.Context, input *model.SearchFilter) (*model.Match, error) {
+func (a API) Match(_ context.Context, input *model.SearchFilter) (*model.Match, error) {
 	var challenger database.Picture
 
 	a.buildQuery(input).

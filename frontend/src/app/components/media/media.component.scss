@@ -1,4 +1,72 @@
-.media-card {
-  max-width: 400px;
-  background-color: white;
+#details-grid {
+  display: grid;
+  grid-template-areas:
+"label-rating rating label-likes likes"
+"label-deviation deviation label-views views"
+"label-wins wins label-created-at created-at"
+"label-losses losses label-updated-at updated-at";
+
+  #label-rating {
+    grid-area: label-rating
+  }
+
+  #rating {
+    grid-area: rating
+  }
+
+  #label-deviation {
+    grid-area: label-deviation
+  }
+
+  #deviation {
+    grid-area: deviation
+  }
+
+  #label-likes {
+    grid-area: label-likes
+  }
+
+  #likes {
+    grid-area: likes
+  }
+
+  #label-views {
+    grid-area: label-views
+  }
+
+  #views {
+    grid-area: views
+  }
+
+  #label-wins {
+    grid-area: label-wins
+  }
+
+  #wins {
+    grid-area: wins
+  }
+
+  #label-losses {
+    grid-area: label-losses
+  }
+
+  #losses {
+    grid-area: losses
+  }
+
+  #label-created-at {
+    grid-area: label-created-at
+  }
+
+  #created-at {
+    grid-area: created-at
+  }
+
+  #label-updated-at {
+    grid-area: label-updated-at
+  }
+
+  #updated-at {
+    grid-area: updated-at
+  }
 }

@@ -1,20 +1,45 @@
-<mat-card class="media-card">
+<mat-card *ngIf="picture | async as p">
+
   <mat-card-header>
-    <div mat-card-avatar class="example-header-image"></div>
-    <mat-card-title>Shiba Inu</mat-card-title>
-    <mat-card-subtitle>Dog Breed</mat-card-subtitle>
+    <!--  Maybe for user who added the pic later?  -->
+    <!--<div mat-card-avatar></div>-->
+
+    <mat-card-title style="display: flex; justify-content: space-between">
+      <p>{{p.Picture.path.split('\\').reverse()[0].split('.')[0].toUpperCase()}}</p>
+      <p>{{p.Picture.id}}</p>
+    </mat-card-title>
+
+    <mat-card-subtitle>{{p.Picture.path}}</mat-card-subtitle>
   </mat-card-header>
-  <img mat-card-image [src]="api + '/p?id=' + 7" [alt]="'asdf'">
-  <mat-card-content>
-    <p>
-      The Shiba Inu is the smallest of the six original and distinct spitz breeds of dog from Japan.
-      A small, agile dog that copes very well with mountainous terrain, the Shiba Inu was originally
-      bred for hunting.
-    </p>
+
+  <img mat-card-image [src]="api + '/p?id=' + p.Picture.id" [alt]="p.Picture.path">
+
+  <mat-card-content id="details-grid">
+    <!--  Edit placement in .scss file  -->
+    <div id="label-rating">Score</div>
+    <div id="rating">{{p.Picture.rating}}</div>
+    <div id="label-deviation">Confidence</div>
+    <div id="deviation">{{p.Picture.deviation}}</div>
+    <div id="label-likes">Likes</div>
+    <div id="likes">{{p.Picture.likes}}</div>
+    <div id="label-views">Views</div>
+    <div id="views">{{p.Picture.views}}</div>
+    <div id="label-wins">Wins</div>
+    <div id="wins">{{p.Picture.wins}}</div>
+    <div id="label-losses">Losses</div>
+    <div id="losses">{{p.Picture.losses}}</div>
+    <div id="label-created-at">Added</div>
+    <div id="created-at">{{p.Picture.createdAt.substring(2, 16)}}</div>
+    <div id="label-updated-at">Updated</div>
+    <div id="updated-at">{{p.Picture.updatedAt.substring(2, 16)}}</div>
   </mat-card-content>
+
+  <mat-divider></mat-divider>
+
   <mat-card-actions>
-    <button mat-raised-button (click)="rateClicked(7)" color="primary">RATE</button>
     <button mat-raised-button (click)="likeClicked(7)" color="accent">LIKE</button>
+    <button mat-raised-button (click)="rateClicked(7)" color="primary">RATE</button>
     <button mat-stroked-button (click)="dislikeClicked(7)" color="warn">DISLIKE</button>
   </mat-card-actions>
+
 </mat-card>
