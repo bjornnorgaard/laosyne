@@ -1,3 +1,12 @@
+.path {
+  overflow: hidden;
+  max-width: 300px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  direction: rtl;
+}
+
 #details-grid {
   display: grid;
   grid-template-areas:

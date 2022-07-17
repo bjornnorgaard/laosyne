@@ -15,7 +15,7 @@ func (a API) LikePicture(_ context.Context, pictureID int) (bool, error) {
 	}
 
 	pic.Likes++
-
 	a.db.Save(&pic)
+
 	return true, nil
 }

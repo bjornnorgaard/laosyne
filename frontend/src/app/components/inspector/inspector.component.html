@@ -1,0 +1,4 @@
+<div class="inspector" *ngIf="result$ | async as result">
+  <image-details *ngFor="let i of result.Pictures" [id]="i.id" style="height: 100%"></image-details>
+</div>
+

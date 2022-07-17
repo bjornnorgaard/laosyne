@@ -23,6 +23,9 @@ func (a API) GetFile() http.Handler {
 			return
 		}
 
+		pic.Likes++
+		a.db.Save(&pic)
+
 		fileBytes, err := os.ReadFile(pic.Path)
 		if err != nil {
 			writer.WriteHeader(http.StatusExpectationFailed)

@@ -4,11 +4,11 @@ import { PictureDetailsGQL, PictureDetailsQuery } from "../../../generated/graph
 import { map, Observable, tap } from "rxjs";
 
 @Component({
-  selector: 'app-media',
-  templateUrl: './media.component.html',
-  styleUrls: ['./media.component.scss']
+  selector: 'image-details',
+  templateUrl: './image-details.component.html',
+  styleUrls: ['./image-details.component.scss']
 })
-export class MediaComponent implements OnChanges {
+export class ImageDetails implements OnChanges {
   @Input() public id: number = 4;
   @Input() public full: boolean = false;
 

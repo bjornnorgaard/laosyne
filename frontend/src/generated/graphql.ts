@@ -132,9 +132,17 @@ export type SearchFilter = {
 };
 
 export enum SortOrder {
+  CreatedAtAsc = 'CREATED_AT_ASC',
+  CreatedAtDesc = 'CREATED_AT_DESC',
+  LikesAsc = 'LIKES_ASC',
+  LikesDesc = 'LIKES_DESC',
   Random = 'RANDOM',
   RatingAsc = 'RATING_ASC',
-  RatingDesc = 'RATING_DESC'
+  RatingDesc = 'RATING_DESC',
+  UpdatedAtAsc = 'UPDATED_AT_ASC',
+  UpdatedAtDesc = 'UPDATED_AT_DESC',
+  ViewsAsc = 'VIEWS_ASC',
+  ViewsDesc = 'VIEWS_DESC'
 }
 
 export type PictureDetailsQueryVariables = Exact<{
@@ -143,6 +151,13 @@ export type PictureDetailsQueryVariables = Exact<{
 
 
 export type PictureDetailsQuery = { __typename?: 'Query', Picture: { __typename?: 'Picture', id: number, path: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
+
+export type InspectorSearchQueryVariables = Exact<{
+  input?: InputMaybe<SearchFilter>;
+}>;
+
+
+export type InspectorSearchQuery = { __typename?: 'Query', Pictures?: Array<{ __typename?: 'Picture', id: number }> | null };
 
 export const PictureDetailsDocument = gql`
   query PictureDetails($id: Int!) {
@@ -158,7 +173,7 @@ export const PictureDetailsDocument = gql`
       updatedAt
       createdAt
     }
-}
+  }
 `;
 
 @Injectable({
@@ -166,6 +181,25 @@ export const PictureDetailsDocument = gql`
 })
 export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, PictureDetailsQueryVariables> {
   document = PictureDetailsDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
+export const InspectorSearchDocument = gql`
+  query InspectorSearch($input: SearchFilter) {
+    Pictures(input: $input) {
+      id
+    }
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class InspectorSearchGQL extends Apollo.Query<InspectorSearchQuery, InspectorSearchQueryVariables> {
+  document = InspectorSearchDocument;
 
   constructor(apollo: Apollo.Apollo) {
     super(apollo);

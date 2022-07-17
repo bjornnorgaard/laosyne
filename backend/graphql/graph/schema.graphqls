@@ -18,6 +18,14 @@ enum SortOrder {
     RANDOM
     RATING_DESC
     RATING_ASC
+    VIEWS_DESC
+    VIEWS_ASC
+    LIKES_DESC
+    LIKES_ASC
+    CREATED_AT_DESC
+    CREATED_AT_ASC
+    UPDATED_AT_DESC
+    UPDATED_AT_ASC
 }
 
 type Mutation {

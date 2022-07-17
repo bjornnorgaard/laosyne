@@ -59,20 +59,36 @@ type SearchFilter struct {
 type SortOrder string
 
 const (
-	SortOrderRandom     SortOrder = "RANDOM"
-	SortOrderRatingDesc SortOrder = "RATING_DESC"
-	SortOrderRatingAsc  SortOrder = "RATING_ASC"
+	SortOrderRandom        SortOrder = "RANDOM"
+	SortOrderRatingDesc    SortOrder = "RATING_DESC"
+	SortOrderRatingAsc     SortOrder = "RATING_ASC"
+	SortOrderViewsDesc     SortOrder = "VIEWS_DESC"
+	SortOrderViewsAsc      SortOrder = "VIEWS_ASC"
+	SortOrderLikesDesc     SortOrder = "LIKES_DESC"
+	SortOrderLikesAsc      SortOrder = "LIKES_ASC"
+	SortOrderCreatedAtDesc SortOrder = "CREATED_AT_DESC"
+	SortOrderCreatedAtAsc  SortOrder = "CREATED_AT_ASC"
+	SortOrderUpdatedAtDesc SortOrder = "UPDATED_AT_DESC"
+	SortOrderUpdatedAtAsc  SortOrder = "UPDATED_AT_ASC"
 )
 
 var AllSortOrder = []SortOrder{
 	SortOrderRandom,
 	SortOrderRatingDesc,
 	SortOrderRatingAsc,
+	SortOrderViewsDesc,
+	SortOrderViewsAsc,
+	SortOrderLikesDesc,
+	SortOrderLikesAsc,
+	SortOrderCreatedAtDesc,
+	SortOrderCreatedAtAsc,
+	SortOrderUpdatedAtDesc,
+	SortOrderUpdatedAtAsc,
 }
 
 func (e SortOrder) IsValid() bool {
 	switch e {
-	case SortOrderRandom, SortOrderRatingDesc, SortOrderRatingAsc:
+	case SortOrderRandom, SortOrderRatingDesc, SortOrderRatingAsc, SortOrderViewsDesc, SortOrderViewsAsc, SortOrderLikesDesc, SortOrderLikesAsc, SortOrderCreatedAtDesc, SortOrderCreatedAtAsc, SortOrderUpdatedAtDesc, SortOrderUpdatedAtAsc:
 		return true
 	}
 	return false

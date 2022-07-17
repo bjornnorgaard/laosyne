@@ -1,0 +1,3 @@
+query InspectorSearch($input: SearchFilter) {
+  Pictures(input: $input) {id}
+}

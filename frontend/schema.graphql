@@ -49,9 +49,17 @@ type Query {
 }
 
 enum SortOrder {
-    RANDOM
-    RATING_ASC
-    RATING_DESC
+  CREATED_AT_ASC
+  CREATED_AT_DESC
+  LIKES_ASC
+  LIKES_DESC
+  RANDOM
+  RATING_ASC
+  RATING_DESC
+  UPDATED_AT_ASC
+  UPDATED_AT_DESC
+  VIEWS_ASC
+  VIEWS_DESC
 }
 
 input DeletePath {

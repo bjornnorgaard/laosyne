@@ -7,12 +7,18 @@ import { GraphQLModule } from './graphql.module';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from "./material/material.module";
-import { MediaComponent } from './components/media/media.component';
+import { ImageDetails } from './components/image-details/image-details.component';
+import { NavigationComponent } from './components/navigation/navigation.component';
+import { MatchComponent } from './components/match/match.component';
+import { InspectorComponent } from './components/inspector/inspector.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MediaComponent,
+    ImageDetails,
+    NavigationComponent,
+    MatchComponent,
+    InspectorComponent,
   ],
   imports: [
     BrowserModule,

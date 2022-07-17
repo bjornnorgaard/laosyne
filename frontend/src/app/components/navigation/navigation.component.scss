@@ -1,0 +1,16 @@
+#navigation {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+
+  a {
+    margin: 1rem 1rem 0 1rem;
+
+    &.active {
+      box-shadow: 3px 4px 10px 1px rgba(0, 0, 0, 0.75);
+    }
+
+  }
+
+}
+

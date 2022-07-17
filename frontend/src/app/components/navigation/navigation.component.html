@@ -1,0 +1,6 @@
+<div id="navigation">
+  <a mat-fab matTooltipPosition="right" color="primary" *ngFor="let r of routes" [matTooltip]="r.route"
+     [routerLink]="r.route.toLowerCase()" routerLinkActive="active">
+    <mat-icon>{{r.icon}}</mat-icon>
+  </a>
+</div>
