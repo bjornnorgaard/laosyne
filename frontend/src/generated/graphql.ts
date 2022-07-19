@@ -134,6 +134,7 @@ export type SearchFilter = {
 export enum SortOrder {
   CreatedAtAsc = 'CREATED_AT_ASC',
   CreatedAtDesc = 'CREATED_AT_DESC',
+  Id = 'ID',
   LikesAsc = 'LIKES_ASC',
   LikesDesc = 'LIKES_DESC',
   Random = 'RANDOM',

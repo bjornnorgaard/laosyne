@@ -23,7 +23,7 @@ func (a API) GetFile() http.Handler {
 			return
 		}
 
-		pic.Likes++
+		pic.Views++
 		a.db.Save(&pic)
 
 		fileBytes, err := os.ReadFile(pic.Path)

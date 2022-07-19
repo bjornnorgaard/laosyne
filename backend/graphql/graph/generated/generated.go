@@ -449,6 +449,7 @@ input SearchFilter {
 }
 
 enum SortOrder {
+    ID
     RANDOM
     RATING_DESC
     RATING_ASC

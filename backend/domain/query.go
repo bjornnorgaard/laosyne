@@ -17,6 +17,8 @@ func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 
 	if input.SortOrder != nil {
 		switch *input.SortOrder {
+		case model.SortOrderID:
+			query = query.Order("id asc")
 		case model.SortOrderRandom:
 			query = query.Order("RANDOM()")
 		case model.SortOrderRatingDesc:
@@ -49,11 +51,11 @@ func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 	}
 
 	if input.LowerRating != nil {
-		query = query.Where("? < rating", input.LowerRating)
+		query = query.Where("? <= rating", input.LowerRating)
 	}
 
 	if input.UpperRating != nil {
-		query = query.Where("rating < ?", input.UpperRating)
+		query = query.Where("rating <= ?", input.UpperRating)
 	}
 
 	if input.Skip != nil {

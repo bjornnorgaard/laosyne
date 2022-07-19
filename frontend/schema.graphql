@@ -51,6 +51,7 @@ type Query {
 enum SortOrder {
   CREATED_AT_ASC
   CREATED_AT_DESC
+  ID
   LIKES_ASC
   LIKES_DESC
   RANDOM

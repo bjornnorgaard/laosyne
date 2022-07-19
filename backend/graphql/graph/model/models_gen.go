@@ -59,6 +59,7 @@ type SearchFilter struct {
 type SortOrder string
 
 const (
+	SortOrderID            SortOrder = "ID"
 	SortOrderRandom        SortOrder = "RANDOM"
 	SortOrderRatingDesc    SortOrder = "RATING_DESC"
 	SortOrderRatingAsc     SortOrder = "RATING_ASC"
@@ -73,6 +74,7 @@ const (
 )
 
 var AllSortOrder = []SortOrder{
+	SortOrderID,
 	SortOrderRandom,
 	SortOrderRatingDesc,
 	SortOrderRatingAsc,
@@ -88,7 +90,7 @@ var AllSortOrder = []SortOrder{
 
 func (e SortOrder) IsValid() bool {
 	switch e {
-	case SortOrderRandom, SortOrderRatingDesc, SortOrderRatingAsc, SortOrderViewsDesc, SortOrderViewsAsc, SortOrderLikesDesc, SortOrderLikesAsc, SortOrderCreatedAtDesc, SortOrderCreatedAtAsc, SortOrderUpdatedAtDesc, SortOrderUpdatedAtAsc:
+	case SortOrderID, SortOrderRandom, SortOrderRatingDesc, SortOrderRatingAsc, SortOrderViewsDesc, SortOrderViewsAsc, SortOrderLikesDesc, SortOrderLikesAsc, SortOrderCreatedAtDesc, SortOrderCreatedAtAsc, SortOrderUpdatedAtDesc, SortOrderUpdatedAtAsc:
 		return true
 	}
 	return false

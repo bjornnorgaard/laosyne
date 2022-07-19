@@ -11,6 +11,7 @@ import { ImageDetails } from './components/image-details/image-details.component
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { MatchComponent } from './components/match/match.component';
 import { InspectorComponent } from './components/inspector/inspector.component';
+import { ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { InspectorComponent } from './components/inspector/inspector.component';
     HttpClientModule,
     BrowserAnimationsModule,
     MaterialModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
