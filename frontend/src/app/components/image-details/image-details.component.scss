@@ -1,3 +1,12 @@
+.name {
+  overflow: hidden;
+  max-width: 200px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  direction: rtl;
+}
+
 .path {
   overflow: hidden;
   max-width: 300px;
@@ -5,6 +14,20 @@
   white-space: nowrap;
   display: block;
   direction: rtl;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+img, video {
+  height: 100%;
+  max-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  box-sizing: border-box;
 }
 
 #details-grid {

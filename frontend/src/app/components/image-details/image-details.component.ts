@@ -1,7 +1,13 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { environment } from "../../../environments/environment";
-import { PictureDetailsGQL, PictureDetailsQuery } from "../../../generated/graphql";
-import { map, Observable, tap } from "rxjs";
+import {
+  DislikePictureGQL,
+  LikePictureGQL,
+  Picture,
+  PictureDetailsGQL,
+  RatePictureGQL
+} from "../../../generated/graphql";
+import { filter, map, Observable, of, tap } from "rxjs";
 
 @Component({
   selector: 'image-details',
@@ -13,35 +19,59 @@ export class ImageDetails implements OnChanges {
   @Input() public full: boolean = false;
 
   public api: string = environment.api;
-  public picture: Observable<PictureDetailsQuery> | undefined;
   public loading: boolean = true;
   public error: any = null;
+  public isVideo: boolean = false;
+  public picture: Observable<Picture> = of({} as Picture);
 
-  constructor(private query: PictureDetailsGQL) {
-    this.update();
+  constructor(private query: PictureDetailsGQL,
+              private rate: RatePictureGQL,
+              private like: LikePictureGQL,
+              private dislike: DislikePictureGQL) {
+    this.refresh();
   }
 
-  private update() {
+  private refresh() {
     this.picture = this.query.watch({id: this.id}).valueChanges.pipe(
       tap(res => this.loading = res.loading),
       tap(res => this.error = res.error),
-      map(res => res.data)
+      filter(res => res.data.Picture.__typename != undefined),
+      map(res => res.data.Picture),
+      tap(res => res.ext === '.webm' ? this.isVideo = true : this.isVideo = false)
     );
   }
 
   rateClicked(id: number): void {
     console.log('rateClicked', id)
+    this.rate.mutate({id: id}).subscribe(pic => {
+      if (!pic.data) {
+        return;
+      }
+      this.picture = of(pic.data.AddToRating)
+    });
   }
 
   likeClicked(id: number): void {
     console.log('likeClicked', id)
+    this.like.mutate({id: id}).subscribe(pic => {
+      if (!pic.data) {
+        return;
+      }
+      this.picture = of(pic.data.LikePicture)
+    });
   }
 
   dislikeClicked(id: number): void {
     console.log('dislikeClicked', id)
+    this.dislike.mutate({id: id}).subscribe(pic => {
+      if (!pic.data) {
+        return;
+      }
+      this.picture = of(pic.data.DislikePicture)
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.update();
+    this.refresh();
   }
 }

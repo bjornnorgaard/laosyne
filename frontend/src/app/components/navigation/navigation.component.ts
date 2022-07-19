@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { RescanPathsGQL } from "../../../generated/graphql";
 
 @Component({
   selector: 'app-navigation',
@@ -12,10 +13,15 @@ export class NavigationComponent implements OnInit {
     {route: 'match', icon: 'play_arrow'},
   ];
 
-  constructor() {
+  constructor(private scan: RescanPathsGQL) {
   }
 
   ngOnInit(): void {
+    this.reScan();
+  }
+
+  public reScan(): void {
+    this.scan.mutate().subscribe();
   }
 
 }

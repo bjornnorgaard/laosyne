@@ -27,11 +27,11 @@ func (r *mutationResolver) AddToRating(ctx context.Context, pictureID int) (*mod
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) LikePicture(ctx context.Context, pictureID int) (bool, error) {
+func (r *mutationResolver) LikePicture(ctx context.Context, pictureID int) (*model.Picture, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DislikePicture(ctx context.Context, pictureID int) (bool, error) {
+func (r *mutationResolver) DislikePicture(ctx context.Context, pictureID int) (*model.Picture, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

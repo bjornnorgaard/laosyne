@@ -34,8 +34,8 @@ type Mutation {
     DeletePath(pathId: Int!): Boolean!
     ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
-    LikePicture(pictureId: Int!): Boolean!
-    DislikePicture(pictureId: Int!): Boolean!
+    LikePicture(pictureId: Int!): Picture!
+    DislikePicture(pictureId: Int!): Picture!
     ReportMatchResult(input: MatchResult!): Boolean!
 }
 

@@ -17,7 +17,7 @@ func (a API) AddToRating(_ context.Context, pictureID int) (*model.Picture, erro
 	}
 
 	if pic.Rating != 0 {
-		return mapPic(pic), nil
+		return nil, nil
 	}
 
 	pic.Rating = trueskill.DefaultMu
@@ -25,5 +25,6 @@ func (a API) AddToRating(_ context.Context, pictureID int) (*model.Picture, erro
 	a.db.Save(&pic)
 
 	dto := mapPic(pic)
+
 	return dto, nil
 }

@@ -5,41 +5,43 @@
     <!--<div mat-card-avatar></div>-->
 
     <mat-card-title style="display: flex; justify-content: space-between">
-      <p>{{p.Picture.path.split('\\').reverse()[0].split('.')[0].toUpperCase()}}</p>
-      <p>{{p.Picture.id}}</p>
+      <p class="name">{{p.path.split('\\').reverse()[0].split('.')[0].toUpperCase()}}</p>
+      <p>{{p.id}}</p>
     </mat-card-title>
 
-    <mat-card-subtitle class="path">{{p.Picture.path}}</mat-card-subtitle>
+    <mat-card-subtitle class="path">{{p.path}}</mat-card-subtitle>
   </mat-card-header>
 
-  <img mat-card-image [src]="api + '/p?id=' + p.Picture.id" [alt]="p.Picture.path">
+  <img *ngIf="!isVideo" mat-card-image [src]="api + '/p?id=' + p.id" [alt]="p.path">
+  <video *ngIf="isVideo" [src]="api + '/p?id=' + p.id" autoplay loop [muted]="true">
 
+  </video>
   <mat-card-content id="details-grid">
     <!--  Edit placement in .scss file  -->
     <div id="label-rating">Score</div>
-    <div id="rating">{{p.Picture.rating}}</div>
+    <div id="rating">{{p.rating}}</div>
     <div id="label-deviation">Confidence</div>
-    <div id="deviation">{{p.Picture.deviation}}</div>
+    <div id="deviation">{{p.deviation | number: '1.1-2'}}</div>
     <div id="label-likes">Likes</div>
-    <div id="likes">{{p.Picture.likes}}</div>
+    <div id="likes">{{p.likes}}</div>
     <div id="label-views">Views</div>
-    <div id="views">{{p.Picture.views}}</div>
+    <div id="views">{{p.views}}</div>
     <div id="label-wins">Wins</div>
-    <div id="wins">{{p.Picture.wins}}</div>
+    <div id="wins">{{p.wins}}</div>
     <div id="label-losses">Losses</div>
-    <div id="losses">{{p.Picture.losses}}</div>
+    <div id="losses">{{p.losses}}</div>
     <div id="label-created-at">Added</div>
-    <div id="created-at">{{p.Picture.createdAt.substring(2, 16)}}</div>
+    <div id="created-at">{{p.createdAt.substring(2, 16)}}</div>
     <div id="label-updated-at">Updated</div>
-    <div id="updated-at">{{p.Picture.updatedAt.substring(2, 16)}}</div>
+    <div id="updated-at">{{p.updatedAt.substring(2, 16)}}</div>
   </mat-card-content>
 
   <mat-divider></mat-divider>
 
   <mat-card-actions>
-    <button mat-raised-button (click)="likeClicked(7)" color="accent">LIKE</button>
-    <button mat-raised-button (click)="rateClicked(7)" color="primary">RATE</button>
-    <button mat-stroked-button (click)="dislikeClicked(7)" color="warn">DISLIKE</button>
+    <button mat-button (click)="dislikeClicked(p.id)" color="warn">DISLIKE</button>
+    <button mat-stroked-button (click)="likeClicked(p.id)" color="primary">LIKE</button>
+    <button mat-raised-button (click)="rateClicked(p.id)" color="primary">RATE</button>
   </mat-card-actions>
 
 </mat-card>

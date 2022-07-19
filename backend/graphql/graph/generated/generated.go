@@ -93,8 +93,8 @@ type MutationResolver interface {
 	DeletePath(ctx context.Context, pathID int) (bool, error)
 	ScanPaths(ctx context.Context) (bool, error)
 	AddToRating(ctx context.Context, pictureID int) (*model.Picture, error)
-	LikePicture(ctx context.Context, pictureID int) (bool, error)
-	DislikePicture(ctx context.Context, pictureID int) (bool, error)
+	LikePicture(ctx context.Context, pictureID int) (*model.Picture, error)
+	DislikePicture(ctx context.Context, pictureID int) (*model.Picture, error)
 	ReportMatchResult(ctx context.Context, input model.MatchResult) (bool, error)
 }
 type QueryResolver interface {
@@ -468,8 +468,8 @@ type Mutation {
     DeletePath(pathId: Int!): Boolean!
     ScanPaths: Boolean!
     AddToRating(pictureId: Int!): Picture!
-    LikePicture(pictureId: Int!): Boolean!
-    DislikePicture(pictureId: Int!): Boolean!
+    LikePicture(pictureId: Int!): Picture!
+    DislikePicture(pictureId: Int!): Picture!
     ReportMatchResult(input: MatchResult!): Boolean!
 }
 
@@ -1111,9 +1111,9 @@ func (ec *executionContext) _Mutation_LikePicture(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*model.Picture)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_LikePicture(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1123,7 +1123,31 @@ func (ec *executionContext) fieldContext_Mutation_LikePicture(ctx context.Contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Picture_id(ctx, field)
+			case "path":
+				return ec.fieldContext_Picture_path(ctx, field)
+			case "ext":
+				return ec.fieldContext_Picture_ext(ctx, field)
+			case "views":
+				return ec.fieldContext_Picture_views(ctx, field)
+			case "likes":
+				return ec.fieldContext_Picture_likes(ctx, field)
+			case "rating":
+				return ec.fieldContext_Picture_rating(ctx, field)
+			case "deviation":
+				return ec.fieldContext_Picture_deviation(ctx, field)
+			case "wins":
+				return ec.fieldContext_Picture_wins(ctx, field)
+			case "losses":
+				return ec.fieldContext_Picture_losses(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Picture_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Picture_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Picture", field.Name)
 		},
 	}
 	defer func() {
@@ -1166,9 +1190,9 @@ func (ec *executionContext) _Mutation_DislikePicture(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*model.Picture)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNPicture2ᚖgithubᚗcomᚋbjornnorgaardᚋlaosyneᚋbackendᚋgraphqlᚋgraphᚋmodelᚐPicture(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_DislikePicture(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1178,7 +1202,31 @@ func (ec *executionContext) fieldContext_Mutation_DislikePicture(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Picture_id(ctx, field)
+			case "path":
+				return ec.fieldContext_Picture_path(ctx, field)
+			case "ext":
+				return ec.fieldContext_Picture_ext(ctx, field)
+			case "views":
+				return ec.fieldContext_Picture_views(ctx, field)
+			case "likes":
+				return ec.fieldContext_Picture_likes(ctx, field)
+			case "rating":
+				return ec.fieldContext_Picture_rating(ctx, field)
+			case "deviation":
+				return ec.fieldContext_Picture_deviation(ctx, field)
+			case "wins":
+				return ec.fieldContext_Picture_wins(ctx, field)
+			case "losses":
+				return ec.fieldContext_Picture_losses(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Picture_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Picture_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Picture", field.Name)
 		},
 	}
 	defer func() {

@@ -36,8 +36,8 @@ export type Mutation = {
   AddPath: Path;
   AddToRating: Picture;
   DeletePath: Scalars['Boolean'];
-  DislikePicture: Scalars['Boolean'];
-  LikePicture: Scalars['Boolean'];
+  DislikePicture: Picture;
+  LikePicture: Picture;
   ReportMatchResult: Scalars['Boolean'];
   ScanPaths: Scalars['Boolean'];
 };
@@ -151,7 +151,28 @@ export type PictureDetailsQueryVariables = Exact<{
 }>;
 
 
-export type PictureDetailsQuery = { __typename?: 'Query', Picture: { __typename?: 'Picture', id: number, path: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
+export type PictureDetailsQuery = { __typename?: 'Query', Picture: { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
+
+export type LikePictureMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type LikePictureMutation = { __typename?: 'Mutation', LikePicture: { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
+
+export type DislikePictureMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DislikePictureMutation = { __typename?: 'Mutation', DislikePicture: { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
+
+export type RatePictureMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type RatePictureMutation = { __typename?: 'Mutation', AddToRating: { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string } };
 
 export type InspectorSearchQueryVariables = Exact<{
   input?: InputMaybe<SearchFilter>;
@@ -160,11 +181,17 @@ export type InspectorSearchQueryVariables = Exact<{
 
 export type InspectorSearchQuery = { __typename?: 'Query', Pictures?: Array<{ __typename?: 'Picture', id: number }> | null };
 
+export type RescanPathsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RescanPathsMutation = { __typename?: 'Mutation', ScanPaths: boolean };
+
 export const PictureDetailsDocument = gql`
   query PictureDetails($id: Int!) {
     Picture(pictureId: $id) {
       id
       path
+      ext
       views
       likes
       losses
@@ -188,6 +215,93 @@ export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, Picture
   }
 }
 
+export const LikePictureDocument = gql`
+  mutation LikePicture($id: Int!) {
+    LikePicture(pictureId: $id) {
+      id
+      path
+      ext
+      views
+      likes
+      losses
+      wins
+      rating
+      deviation
+      updatedAt
+      createdAt
+    }
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LikePictureGQL extends Apollo.Mutation<LikePictureMutation, LikePictureMutationVariables> {
+  document = LikePictureDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
+export const DislikePictureDocument = gql`
+  mutation DislikePicture($id: Int!) {
+    DislikePicture(pictureId: $id) {
+      id
+      path
+      ext
+      views
+      likes
+      losses
+      wins
+      rating
+      deviation
+      updatedAt
+      createdAt
+    }
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DislikePictureGQL extends Apollo.Mutation<DislikePictureMutation, DislikePictureMutationVariables> {
+  document = DislikePictureDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
+export const RatePictureDocument = gql`
+  mutation RatePicture($id: Int!) {
+    AddToRating(pictureId: $id) {
+      id
+      path
+      ext
+      views
+      likes
+      losses
+      wins
+      rating
+      deviation
+      updatedAt
+      createdAt
+    }
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RatePictureGQL extends Apollo.Mutation<RatePictureMutation, RatePictureMutationVariables> {
+  document = RatePictureDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
 export const InspectorSearchDocument = gql`
   query InspectorSearch($input: SearchFilter) {
     Pictures(input: $input) {
@@ -201,6 +315,23 @@ export const InspectorSearchDocument = gql`
 })
 export class InspectorSearchGQL extends Apollo.Query<InspectorSearchQuery, InspectorSearchQueryVariables> {
   document = InspectorSearchDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
+export const RescanPathsDocument = gql`
+  mutation RescanPaths {
+    ScanPaths
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RescanPathsGQL extends Apollo.Mutation<RescanPathsMutation, RescanPathsMutationVariables> {
+  document = RescanPathsDocument;
 
   constructor(apollo: Apollo.Apollo) {
     super(apollo);

@@ -15,8 +15,8 @@ export class InspectorComponent implements OnInit {
   public result$: Observable<InspectorSearchQuery> | undefined;
 
   public form: FormGroup = new FormGroup({});
-  public pathCtrl: FormControl = new FormControl('');
-  public pageCtrl: FormControl = new FormControl(0);
+  public pathCtrl: FormControl = new FormControl();
+  public pageCtrl: FormControl = new FormControl();
   public lowerRatingCtrl: FormControl = new FormControl();
   public upperRatingCtrl: FormControl = new FormControl();
   public sortOrderCtrl: FormControl = new FormControl();

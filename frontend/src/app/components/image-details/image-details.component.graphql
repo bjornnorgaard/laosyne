@@ -2,6 +2,55 @@ query PictureDetails($id: Int!) {
   Picture(pictureId: $id) {
     id
     path
+    ext
+    views
+    likes
+    losses
+    wins
+    rating
+    deviation
+    updatedAt
+    createdAt
+  }
+}
+
+mutation LikePicture($id: Int!) {
+  LikePicture(pictureId: $id) {
+    id
+    path
+    ext
+    views
+    likes
+    losses
+    wins
+    rating
+    deviation
+    updatedAt
+    createdAt
+  }
+}
+
+mutation DislikePicture($id: Int!) {
+  DislikePicture(pictureId: $id) {
+    id
+    path
+    ext
+    views
+    likes
+    losses
+    wins
+    rating
+    deviation
+    updatedAt
+    createdAt
+  }
+}
+
+mutation RatePicture($id: Int!) {
+  AddToRating(pictureId: $id) {
+    id
+    path
+    ext
     views
     likes
     losses
