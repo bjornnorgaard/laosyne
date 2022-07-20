@@ -16,7 +16,7 @@ export class InspectorComponent implements OnInit {
 
   public form: FormGroup = new FormGroup({});
   public pathCtrl: FormControl = new FormControl();
-  public pageCtrl: FormControl = new FormControl();
+  public pageCtrl: FormControl = new FormControl(0);
   public lowerRatingCtrl: FormControl = new FormControl();
   public upperRatingCtrl: FormControl = new FormControl();
   public sortOrderCtrl: FormControl = new FormControl();
@@ -34,23 +34,29 @@ export class InspectorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const savedForm = localStorage.getItem('form');
+    if (savedForm && savedForm.length > 3) {
+      this.form.setValue(JSON.parse(savedForm))
+    }
+
     this.sortOrderOptions = Object.keys(SortOrder)
       .filter(v => isNaN(Number(v)))
       .map(name => ({id: SortOrder[name as keyof typeof SortOrder], name}));
 
     this.form.valueChanges.pipe(debounceTime(500)).subscribe(() => this.update());
-
     this.update();
   }
 
   private update(): void {
     const filter = this.createFilter();
 
-    this.result$ = this.query.watch({input: filter}).valueChanges.pipe(
+    let watch = this.query.watch({input: filter});
+    this.result$ = watch.valueChanges.pipe(
       tap(res => this.loading = res.loading),
       tap(res => this.error = res.error),
       map(res => res.data),
     );
+    // watch.startPolling(1000);
   }
 
   private createFilter(): SearchFilter {
@@ -79,6 +85,7 @@ export class InspectorComponent implements OnInit {
     }
 
     console.log('created filter', filter);
+    localStorage.setItem('form', JSON.stringify(this.form.value));
     return filter
   }
 

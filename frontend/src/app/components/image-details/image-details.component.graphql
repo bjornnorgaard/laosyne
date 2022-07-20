@@ -1,63 +1,37 @@
+fragment PictureParts on Picture {
+  id
+  path
+  ext
+  views
+  likes
+  losses
+  wins
+  rating
+  deviation
+  updatedAt
+  createdAt
+}
+
 query PictureDetails($id: Int!) {
   Picture(pictureId: $id) {
-    id
-    path
-    ext
-    views
-    likes
-    losses
-    wins
-    rating
-    deviation
-    updatedAt
-    createdAt
+    ...PictureParts
   }
 }
 
 mutation LikePicture($id: Int!) {
   LikePicture(pictureId: $id) {
-    id
-    path
-    ext
-    views
-    likes
-    losses
-    wins
-    rating
-    deviation
-    updatedAt
-    createdAt
+    ...PictureParts
   }
 }
 
 mutation DislikePicture($id: Int!) {
   DislikePicture(pictureId: $id) {
-    id
-    path
-    ext
-    views
-    likes
-    losses
-    wins
-    rating
-    deviation
-    updatedAt
-    createdAt
+    ...PictureParts
   }
 }
 
 mutation RatePicture($id: Int!) {
   AddToRating(pictureId: $id) {
-    id
-    path
-    ext
-    views
-    likes
-    losses
-    wins
-    rating
-    deviation
-    updatedAt
-    createdAt
+    ...PictureParts
   }
 }

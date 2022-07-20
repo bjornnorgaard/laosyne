@@ -1,1 +1,9 @@
-<p>match works!</p>
+<div *ngIf="result$ | async as result" class="match">
+
+  <image-details class="match-img" (click)="reportResult(result.Match.playerOne.id, result.Match.playerTwo.id)"
+                 [id]="result.Match.playerOne.id" [full]="true"></image-details>
+
+  <image-details class="match-img" (click)="reportResult(result.Match.playerTwo.id, result.Match.playerOne.id)"
+                 [id]="result.Match.playerTwo.id" [full]="true"></image-details>
+
+</div>

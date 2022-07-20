@@ -146,6 +146,8 @@ export enum SortOrder {
   ViewsDesc = 'VIEWS_DESC'
 }
 
+export type PicturePartsFragment = { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string };
+
 export type PictureDetailsQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
@@ -181,28 +183,46 @@ export type InspectorSearchQueryVariables = Exact<{
 
 export type InspectorSearchQuery = { __typename?: 'Query', Pictures?: Array<{ __typename?: 'Picture', id: number }> | null };
 
+export type CreateMatchQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateMatchQuery = { __typename?: 'Query', Match: { __typename?: 'Match', playerOne: { __typename?: 'Picture', id: number }, playerTwo: { __typename?: 'Picture', id: number } } };
+
+export type ReportMatchWinnerMutationVariables = Exact<{
+  winnerId: Scalars['Int'];
+  loserId: Scalars['Int'];
+}>;
+
+
+export type ReportMatchWinnerMutation = { __typename?: 'Mutation', ReportMatchResult: boolean };
+
 export type RescanPathsMutationVariables = Exact<{ [key: string]: never; }>;
 
 
 export type RescanPathsMutation = { __typename?: 'Mutation', ScanPaths: boolean };
 
+export const PicturePartsFragmentDoc = gql`
+  fragment PictureParts on Picture {
+    id
+    path
+    ext
+    views
+    likes
+    losses
+    wins
+    rating
+    deviation
+    updatedAt
+    createdAt
+  }
+`;
 export const PictureDetailsDocument = gql`
   query PictureDetails($id: Int!) {
     Picture(pictureId: $id) {
-      id
-      path
-      ext
-      views
-      likes
-      losses
-      wins
-      rating
-      deviation
-      updatedAt
-      createdAt
+      ...PictureParts
     }
   }
-`;
+${PicturePartsFragmentDoc}`;
 
 @Injectable({
   providedIn: 'root'
@@ -218,20 +238,10 @@ export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, Picture
 export const LikePictureDocument = gql`
   mutation LikePicture($id: Int!) {
     LikePicture(pictureId: $id) {
-      id
-      path
-      ext
-      views
-      likes
-      losses
-      wins
-      rating
-      deviation
-      updatedAt
-      createdAt
+      ...PictureParts
     }
   }
-`;
+${PicturePartsFragmentDoc}`;
 
 @Injectable({
   providedIn: 'root'
@@ -247,20 +257,10 @@ export class LikePictureGQL extends Apollo.Mutation<LikePictureMutation, LikePic
 export const DislikePictureDocument = gql`
   mutation DislikePicture($id: Int!) {
     DislikePicture(pictureId: $id) {
-      id
-      path
-      ext
-      views
-      likes
-      losses
-      wins
-      rating
-      deviation
-      updatedAt
-      createdAt
+      ...PictureParts
     }
   }
-`;
+${PicturePartsFragmentDoc}`;
 
 @Injectable({
   providedIn: 'root'
@@ -276,20 +276,10 @@ export class DislikePictureGQL extends Apollo.Mutation<DislikePictureMutation, D
 export const RatePictureDocument = gql`
   mutation RatePicture($id: Int!) {
     AddToRating(pictureId: $id) {
-      id
-      path
-      ext
-      views
-      likes
-      losses
-      wins
-      rating
-      deviation
-      updatedAt
-      createdAt
+      ...PictureParts
     }
   }
-`;
+${PicturePartsFragmentDoc}`;
 
 @Injectable({
   providedIn: 'root'
@@ -315,6 +305,47 @@ export const InspectorSearchDocument = gql`
 })
 export class InspectorSearchGQL extends Apollo.Query<InspectorSearchQuery, InspectorSearchQueryVariables> {
   document = InspectorSearchDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
+export const CreateMatchDocument = gql`
+  query CreateMatch {
+    Match {
+      playerOne {
+        id
+      }
+      playerTwo {
+        id
+      }
+    }
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CreateMatchGQL extends Apollo.Query<CreateMatchQuery, CreateMatchQueryVariables> {
+  document = CreateMatchDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+
+export const ReportMatchWinnerDocument = gql`
+  mutation ReportMatchWinner($winnerId: Int!, $loserId: Int!) {
+    ReportMatchResult(input: {winnerId: $winnerId, loserId: $loserId})
+  }
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ReportMatchWinnerGQL extends Apollo.Mutation<ReportMatchWinnerMutation, ReportMatchWinnerMutationVariables> {
+  document = ReportMatchWinnerDocument;
 
   constructor(apollo: Apollo.Apollo) {
     super(apollo);

@@ -17,6 +17,7 @@ import { filter, map, Observable, of, tap } from "rxjs";
 export class ImageDetails implements OnChanges {
   @Input() public id: number = 4;
   @Input() public full: boolean = false;
+  @Input() public watch: boolean = false;
 
   public api: string = environment.api;
   public loading: boolean = true;
@@ -32,13 +33,18 @@ export class ImageDetails implements OnChanges {
   }
 
   private refresh() {
-    this.picture = this.query.watch({id: this.id}).valueChanges.pipe(
+    let watch = this.query.watch({id: this.id});
+    this.picture = watch.valueChanges.pipe(
       tap(res => this.loading = res.loading),
       tap(res => this.error = res.error),
       filter(res => res.data.Picture.__typename != undefined),
       map(res => res.data.Picture),
       tap(res => res.ext === '.webm' ? this.isVideo = true : this.isVideo = false)
     );
+
+    if (this.watch) {
+      watch.startPolling(5000);
+    }
   }
 
   rateClicked(id: number): void {

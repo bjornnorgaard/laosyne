@@ -1,0 +1,14 @@
+query CreateMatch {
+  Match {
+    playerOne {
+      id
+    }
+    playerTwo {
+      id
+    }
+  }
+}
+
+mutation ReportMatchWinner($winnerId: Int!, $loserId: Int!) {
+  ReportMatchResult(input: {winnerId: $winnerId, loserId: $loserId})
+}
