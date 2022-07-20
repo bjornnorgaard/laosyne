@@ -29,6 +29,7 @@ require (
 	github.com/jackc/pgx/v4 v4.16.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/matryer/moq v0.2.7 // indirect
 	github.com/mitchellh/mapstructure v1.3.1 // indirect

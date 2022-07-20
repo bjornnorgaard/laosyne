@@ -2,6 +2,20 @@ version: '3.8'
 
 services:
 
+  backend:
+    image: laosyne-backend:latest
+    build:
+      context: backend
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASS: changeme
+      DB_NAME: postgres
+      DB_PORT: 5432
+
   postgres:
     image: postgres
     ports:

@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 	"gorm.io/driver/postgres"
@@ -14,7 +15,13 @@ type Repository struct {
 }
 
 func NewRepository() Repository {
-	dsn := "host=localhost user=postgres password=changeme dbname=postgres port=5432 sslmode=disable"
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	pass := os.Getenv("DB_PASS")
+	name := os.Getenv("DB_NAME")
+	port := os.Getenv("DB_PORT")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, pass, name, port)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
