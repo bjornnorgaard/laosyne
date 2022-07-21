@@ -1,6 +1,7 @@
+import * as Apollo from 'apollo-angular';
 import { gql } from 'apollo-angular';
 import { Injectable } from '@angular/core';
-import * as Apollo from 'apollo-angular';
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -201,162 +202,162 @@ export type RescanPathsMutationVariables = Exact<{ [key: string]: never; }>;
 export type RescanPathsMutation = { __typename?: 'Mutation', ScanPaths: boolean };
 
 export const PicturePartsFragmentDoc = gql`
-    fragment PictureParts on Picture {
-  id
-  path
-  ext
-  views
-  likes
-  losses
-  wins
-  rating
-  deviation
-  updatedAt
-  createdAt
-}
-    `;
-export const PictureDetailsDocument = gql`
-    query PictureDetails($id: Int!) {
-  Picture(pictureId: $id) {
-    ...PictureParts
-  }
-}
-    ${PicturePartsFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, PictureDetailsQueryVariables> {
-    document = PictureDetailsDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const LikePictureDocument = gql`
-    mutation LikePicture($id: Int!) {
-  LikePicture(pictureId: $id) {
-    ...PictureParts
-  }
-}
-    ${PicturePartsFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class LikePictureGQL extends Apollo.Mutation<LikePictureMutation, LikePictureMutationVariables> {
-    document = LikePictureDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const DislikePictureDocument = gql`
-    mutation DislikePicture($id: Int!) {
-  DislikePicture(pictureId: $id) {
-    ...PictureParts
-  }
-}
-    ${PicturePartsFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class DislikePictureGQL extends Apollo.Mutation<DislikePictureMutation, DislikePictureMutationVariables> {
-    document = DislikePictureDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const RatePictureDocument = gql`
-    mutation RatePicture($id: Int!) {
-  AddToRating(pictureId: $id) {
-    ...PictureParts
-  }
-}
-    ${PicturePartsFragmentDoc}`;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class RatePictureGQL extends Apollo.Mutation<RatePictureMutation, RatePictureMutationVariables> {
-    document = RatePictureDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const InspectorSearchDocument = gql`
-    query InspectorSearch($input: SearchFilter) {
-  Pictures(input: $input) {
+  fragment PictureParts on Picture {
     id
+    path
+    ext
+    views
+    likes
+    losses
+    wins
+    rating
+    deviation
+    updatedAt
+    createdAt
+}
+`;
+export const PictureDetailsDocument = gql`
+  query PictureDetails($id: Int!) {
+    Picture(pictureId: $id) {
+      ...PictureParts
+    }
+}
+${PicturePartsFragmentDoc}`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, PictureDetailsQueryVariables> {
+  document = PictureDetailsDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
   }
 }
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class InspectorSearchGQL extends Apollo.Query<InspectorSearchQuery, InspectorSearchQueryVariables> {
-    document = InspectorSearchDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
+export const LikePictureDocument = gql`
+  mutation LikePicture($id: Int!) {
+    LikePicture(pictureId: $id) {
+      ...PictureParts
     }
+}
+${PicturePartsFragmentDoc}`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class LikePictureGQL extends Apollo.Mutation<LikePictureMutation, LikePictureMutationVariables> {
+  document = LikePictureDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
   }
+}
+export const DislikePictureDocument = gql`
+  mutation DislikePicture($id: Int!) {
+    DislikePicture(pictureId: $id) {
+      ...PictureParts
+    }
+}
+${PicturePartsFragmentDoc}`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class DislikePictureGQL extends Apollo.Mutation<DislikePictureMutation, DislikePictureMutationVariables> {
+  document = DislikePictureDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+export const RatePictureDocument = gql`
+  mutation RatePicture($id: Int!) {
+    AddToRating(pictureId: $id) {
+      ...PictureParts
+    }
+}
+${PicturePartsFragmentDoc}`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class RatePictureGQL extends Apollo.Mutation<RatePictureMutation, RatePictureMutationVariables> {
+  document = RatePictureDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
+export const InspectorSearchDocument = gql`
+  query InspectorSearch($input: SearchFilter) {
+    Pictures(input: $input) {
+      id
+    }
+}
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class InspectorSearchGQL extends Apollo.Query<InspectorSearchQuery, InspectorSearchQueryVariables> {
+  document = InspectorSearchDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
+  }
+}
 export const CreateMatchDocument = gql`
-    query CreateMatch {
-  Match {
-    playerOne {
-      id
+  query CreateMatch {
+    Match {
+      playerOne {
+        id
+      }
+      playerTwo {
+        id
+      }
     }
-    playerTwo {
-      id
-    }
+}
+`;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CreateMatchGQL extends Apollo.Query<CreateMatchQuery, CreateMatchQueryVariables> {
+  document = CreateMatchDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
   }
 }
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class CreateMatchGQL extends Apollo.Query<CreateMatchQuery, CreateMatchQueryVariables> {
-    document = CreateMatchDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
 export const ReportMatchWinnerDocument = gql`
-    mutation ReportMatchWinner($winnerId: Int!, $loserId: Int!) {
-  ReportMatchResult(input: {winnerId: $winnerId, loserId: $loserId})
+  mutation ReportMatchWinner($winnerId: Int!, $loserId: Int!) {
+    ReportMatchResult(input: {winnerId: $winnerId, loserId: $loserId})
 }
-    `;
+`;
 
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ReportMatchWinnerGQL extends Apollo.Mutation<ReportMatchWinnerMutation, ReportMatchWinnerMutationVariables> {
-    document = ReportMatchWinnerDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
+@Injectable({
+  providedIn: 'root'
+})
+export class ReportMatchWinnerGQL extends Apollo.Mutation<ReportMatchWinnerMutation, ReportMatchWinnerMutationVariables> {
+  document = ReportMatchWinnerDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
   }
+}
 export const RescanPathsDocument = gql`
-    mutation RescanPaths {
-  ScanPaths
+  mutation RescanPaths {
+    ScanPaths
 }
-    `;
+`;
 
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class RescanPathsGQL extends Apollo.Mutation<RescanPathsMutation, RescanPathsMutationVariables> {
-    document = RescanPathsDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
+@Injectable({
+  providedIn: 'root'
+})
+export class RescanPathsGQL extends Apollo.Mutation<RescanPathsMutation, RescanPathsMutationVariables> {
+  document = RescanPathsDocument;
+
+  constructor(apollo: Apollo.Apollo) {
+    super(apollo);
   }
+}

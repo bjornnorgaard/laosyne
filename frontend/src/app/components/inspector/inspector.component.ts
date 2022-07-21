@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { InspectorSearchGQL, InspectorSearchQuery, SearchFilter, SortOrder } from "../../../generated/graphql";
-import { debounceTime, map, Observable, tap } from "rxjs";
+import { debounceTime, map, Observable, startWith, tap } from "rxjs";
 import { FormControl, FormGroup } from "@angular/forms";
 
 @Component({
@@ -9,7 +9,6 @@ import { FormControl, FormGroup } from "@angular/forms";
   styleUrls: ['./inspector.component.scss']
 })
 export class InspectorComponent implements OnInit {
-
   public loading: boolean = true;
   public error: any = null;
   public result$: Observable<InspectorSearchQuery> | undefined;
@@ -43,8 +42,11 @@ export class InspectorComponent implements OnInit {
       .filter(v => isNaN(Number(v)))
       .map(name => ({id: SortOrder[name as keyof typeof SortOrder], name}));
 
-    this.form.valueChanges.pipe(debounceTime(500)).subscribe(() => this.update());
-    this.update();
+    this.form.valueChanges.pipe(
+      startWith(this.createFilter()),
+      debounceTime(500)).subscribe(() => this.update());
+
+    this.query.watch({input: this.createFilter()}).refetch();
   }
 
   private update(): void {
@@ -56,7 +58,6 @@ export class InspectorComponent implements OnInit {
       tap(res => this.error = res.error),
       map(res => res.data),
     );
-    // watch.startPolling(1000);
   }
 
   private createFilter(): SearchFilter {

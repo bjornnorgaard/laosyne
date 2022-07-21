@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CreateMatchGQL, CreateMatchQuery, ReportMatchWinnerGQL } from "../../../generated/graphql";
-import { map, Observable, of } from "rxjs";
+import { filter, map, Observable, of } from "rxjs";
 
 @Component({
   selector: 'app-match',
@@ -19,7 +19,9 @@ export class MatchComponent implements OnInit {
   }
 
   private createMatch() {
-    this.result$ = this.match.watch().valueChanges.pipe(map(res => res.data));
+    this.result$ = this.match.watch().valueChanges.pipe(
+      filter(res => !!res.data.Match.playerOne.id),
+      map(res => res.data));
   }
 
   public reportResult(winnerId: number, loserId: number): void {
