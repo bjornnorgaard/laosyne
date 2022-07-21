@@ -67,6 +67,10 @@ const (
 	SortOrderViewsAsc      SortOrder = "VIEWS_ASC"
 	SortOrderLikesDesc     SortOrder = "LIKES_DESC"
 	SortOrderLikesAsc      SortOrder = "LIKES_ASC"
+	SortOrderWinsDesc      SortOrder = "WINS_DESC"
+	SortOrderWinsAsc       SortOrder = "WINS_ASC"
+	SortOrderLossesDesc    SortOrder = "LOSSES_DESC"
+	SortOrderLossesAsc     SortOrder = "LOSSES_ASC"
 	SortOrderCreatedAtDesc SortOrder = "CREATED_AT_DESC"
 	SortOrderCreatedAtAsc  SortOrder = "CREATED_AT_ASC"
 	SortOrderUpdatedAtDesc SortOrder = "UPDATED_AT_DESC"
@@ -82,6 +86,10 @@ var AllSortOrder = []SortOrder{
 	SortOrderViewsAsc,
 	SortOrderLikesDesc,
 	SortOrderLikesAsc,
+	SortOrderWinsDesc,
+	SortOrderWinsAsc,
+	SortOrderLossesDesc,
+	SortOrderLossesAsc,
 	SortOrderCreatedAtDesc,
 	SortOrderCreatedAtAsc,
 	SortOrderUpdatedAtDesc,
@@ -90,7 +98,7 @@ var AllSortOrder = []SortOrder{
 
 func (e SortOrder) IsValid() bool {
 	switch e {
-	case SortOrderID, SortOrderRandom, SortOrderRatingDesc, SortOrderRatingAsc, SortOrderViewsDesc, SortOrderViewsAsc, SortOrderLikesDesc, SortOrderLikesAsc, SortOrderCreatedAtDesc, SortOrderCreatedAtAsc, SortOrderUpdatedAtDesc, SortOrderUpdatedAtAsc:
+	case SortOrderID, SortOrderRandom, SortOrderRatingDesc, SortOrderRatingAsc, SortOrderViewsDesc, SortOrderViewsAsc, SortOrderLikesDesc, SortOrderLikesAsc, SortOrderWinsDesc, SortOrderWinsAsc, SortOrderLossesDesc, SortOrderLossesAsc, SortOrderCreatedAtDesc, SortOrderCreatedAtAsc, SortOrderUpdatedAtDesc, SortOrderUpdatedAtAsc:
 		return true
 	}
 	return false

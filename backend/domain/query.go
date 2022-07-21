@@ -33,6 +33,14 @@ func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
 			query = query.Order("likes desc")
 		case model.SortOrderLikesAsc:
 			query = query.Order("likes asc")
+		case model.SortOrderWinsDesc:
+			query = query.Order("wins desc")
+		case model.SortOrderWinsAsc:
+			query = query.Order("wins asc")
+		case model.SortOrderLossesDesc:
+			query = query.Order("losses desc")
+		case model.SortOrderLossesAsc:
+			query = query.Order("losses asc")
 		case model.SortOrderCreatedAtDesc:
 			query = query.Order("created_at desc")
 		case model.SortOrderCreatedAtAsc:

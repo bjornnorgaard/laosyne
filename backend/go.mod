@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.5
 	github.com/go-chi/chi v1.5.4
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.10.6
 	github.com/rs/cors v1.8.2
 	github.com/samber/lo v1.21.0
@@ -29,7 +30,6 @@ require (
 	github.com/jackc/pgx/v4 v4.16.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/matryer/moq v0.2.7 // indirect
 	github.com/mitchellh/mapstructure v1.3.1 // indirect
