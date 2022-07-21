@@ -9,9 +9,18 @@
     }
 
     .content {
-      .mat-form-field {
+
+      .row {
+        display: flex;
+        gap: 1rem;
+
+        .control {
+          min-width: 0;
+        }
+      }
+
+      .control {
         width: 100%;
-        padding-top: 0.5rem;
       }
 
       .button {
