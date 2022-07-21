@@ -3,6 +3,8 @@ package domain
 import (
 	"net/http"
 	"os"
+	"runtime"
+	"strings"
 
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 )
@@ -25,6 +27,12 @@ func (a API) GetFile() http.Handler {
 
 		pic.Views++
 		a.db.Save(&pic)
+
+		//goland:noinspection ALL
+		if runtime.GOOS != "windows" {
+			pic.Path = strings.Replace(pic.Path, "C:", "", 1)
+			pic.Path = strings.Replace(pic.Path, "\\", "/", -1)
+		}
 
 		fileBytes, err := os.ReadFile(pic.Path)
 		if err != nil {

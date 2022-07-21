@@ -19,7 +19,6 @@ services:
       - postgres
     volumes:
       - C:\src:/src
-      - P:\Lang:/Lang
 
   postgres:
     image: postgres

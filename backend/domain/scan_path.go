@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -57,10 +58,13 @@ func (a API) scanFolder(ctx context.Context, path string) {
 			continue
 		}
 
-		pictures = append(pictures, database.Picture{
-			Path: itemPath,
-			Ext:  ext,
-		})
+		picture := database.Picture{Path: itemPath, Ext: ext}
+		//goland:noinspection ALL
+		if runtime.GOOS != "windows" {
+			picture.Path = fmt.Sprintf("C:%s", strings.Replace(picture.Path, "/", "\\", -1))
+		}
+
+		pictures = append(pictures, picture)
 	}
 
 	if len(pictures) == 0 {

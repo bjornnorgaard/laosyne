@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RescanPathsGQL } from "../../../generated/graphql";
 
 @Component({
@@ -6,7 +6,7 @@ import { RescanPathsGQL } from "../../../generated/graphql";
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.scss']
 })
-export class NavigationComponent implements OnInit {
+export class NavigationComponent  {
 
   public routes: Route[] = [
     {route: 'inspector', icon: 'search'},
@@ -14,10 +14,6 @@ export class NavigationComponent implements OnInit {
   ];
 
   constructor(private scan: RescanPathsGQL) {
-  }
-
-  ngOnInit(): void {
-    this.reScan();
   }
 
   public reScan(): void {
