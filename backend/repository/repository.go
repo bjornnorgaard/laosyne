@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/bjornnorgaard/laosyne/backend/repository/database"
 	"gorm.io/driver/postgres"
@@ -15,25 +16,38 @@ type Repository struct {
 }
 
 func NewRepository() Repository {
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	name := os.Getenv("DB_NAME")
-	port := os.Getenv("DB_PORT")
-
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, pass, name, port)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dsn := os.ExpandEnv("host=${DB_HOST} user=${DB_USER} password=${DB_PASS} dbname=${DB_NAME} port=${DB_PORT} sslmode=disable")
+	db, err := openConnection(dsn)
 	if err != nil {
-		log.Fatal(fmt.Errorf("failed to open database connection, %w", err))
+		log.Fatal(err)
 	}
 
 	err = db.AutoMigrate(&database.Picture{}, &database.Path{}, &database.Match{})
 	if err != nil {
-		log.Fatal(fmt.Errorf("failed to migrate database: %w", err))
+		log.Fatal(err)
 	}
 
 	return Repository{db}
+}
+
+func openConnection(dsn string) (*gorm.DB, error) {
+	open, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	retries := 0
+	for err != nil {
+		time.Sleep(time.Second * 1)
+		retries++
+		if 2 <= retries {
+			break
+		}
+
+		open, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			break
+		}
+	}
+
+	return open, err
 }
 
 func (r Repository) QueryPictures() *gorm.DB {

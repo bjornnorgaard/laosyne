@@ -8,9 +8,8 @@ COPY . .
 RUN go build main.go
 
 FROM gcr.io/distroless/base-debian10
-WORKDIR /app
-EXPOSE 8080
+
+COPY --from=build /app/main .
 USER nonroot:nonroot
 
-COPY --from=build app/main .
 ENTRYPOINT ["./main"]
