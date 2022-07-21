@@ -20,6 +20,13 @@ func (a API) ReportMatchResult(_ context.Context, input model.MatchResult) (bool
 		return false, fmt.Errorf("no picture with loser ID %d", input.LoserID)
 	}
 
+	if winner.Rating == 0 {
+		return false, fmt.Errorf("winner ID %s is not rated", winner.ID)
+	}
+	if loser.Rating == 0 {
+		return false, fmt.Errorf("loser ID %s is not rated", loser.ID)
+	}
+
 	ts := trueskill.New(trueskill.DrawProbabilityZero())
 
 	playerWinner := trueskill.NewPlayer(winner.Rating, winner.Deviation)
