@@ -1,26 +1,30 @@
 .inspector {
-  padding: 1rem;
+  padding: 1rem 1rem 0 0;
   display: grid;
   grid-gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(390px, 1fr));
-  min-width: 80vw;
-}
 
-.mat-form-field {
-  width: 100%;
-  padding-top: 0.5rem;
-}
+  .card {
+    .header {
+    }
 
-mat-card-actions {
-  display: flex;
-  justify-content: space-around;
-  margin: 0.1rem;
-}
+    .content {
+      .mat-form-field {
+        width: 100%;
+        padding-top: 0.5rem;
+      }
 
-mat-card-content {
-  button {
-    margin-top: 1rem;
-    width: 100%;
+      .reset-button {
+        margin-top: 1rem;
+        width: 100%;
+      }
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-around;
+      margin: 0.1rem;
+    }
   }
 }
 
@@ -31,4 +35,12 @@ mat-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.loader {
+  @extend .centered;
+}
+
+.empty {
+  @extend .centered;
 }

@@ -1,10 +1,21 @@
 .match {
   display: flex;
-  justify-content: space-around;
-  gap: 1rem;
+  width: 100%;
+  height: 100%;
 
-  .match-img {
-    width: 47vw;
-    height: 99vh;
+  .player {
+    width: 50%;
+    height: 100%;
+    transition: all 100ms ease-out;
+    cursor: pointer;
+  }
+
+  @media (orientation: portrait) {
+    flex-direction: column;
+
+    .player {
+      height: 50%;
+      width: 100%;
+    }
   }
 }

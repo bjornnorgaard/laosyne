@@ -1,18 +1,18 @@
-<mat-spinner class="centered" *ngIf="loading"></mat-spinner>
-<div class="centered" *ngIf="empty">
+<mat-spinner class="loader" *ngIf="loading"></mat-spinner>
+<div class="empty" *ngIf="empty">
   <h1>Oh noes!</h1>
   <h2>No results for your search</h2>
   <button mat-raised-button color="primary" (click)="resetFormFilter()">RESET FILTER</button>
 </div>
 
 <div class="inspector">
-  <mat-card>
-    <mat-card-header>
+  <mat-card class="card">
+    <mat-card-header class="header">
       <mat-card-title>Filter controls</mat-card-title>
       <mat-card-subtitle>Change controls and see what you get</mat-card-subtitle>
     </mat-card-header>
 
-    <mat-card-content>
+    <mat-card-content class="content">
       <mat-form-field appearance="outline">
         <mat-label>Sort order</mat-label>
         <mat-select [formControl]="sortOrderCtrl">
@@ -40,11 +40,11 @@
         <mat-hint>Highest rating to show (inclusive)</mat-hint>
       </mat-form-field>
 
-      <button mat-stroked-button (click)="resetFormFilter()">Reset filter</button>
+      <button mat-stroked-button class="reset-button" (click)="resetFormFilter()">Reset filter</button>
 
     </mat-card-content>
 
-    <mat-card-actions>
+    <mat-card-actions class="actions">
       <button mat-button color="primary" (click)="previousPageClicked()" [disabled]="pageCtrl.value == 0">Previous
         page
       </button>
