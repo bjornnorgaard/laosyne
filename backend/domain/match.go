@@ -26,7 +26,7 @@ func (a API) Match(_ context.Context, input *model.SearchFilter) (*model.Match, 
 			First(&challenger)
 	}
 
-	opponent := a.findOpponent(challenger)
+	opponent := a.findWorthyOpponent(challenger)
 
 	match := &model.Match{
 		PlayerOne: mapPic(challenger),
@@ -50,6 +50,48 @@ func (a API) findOpponent(challenger database.Picture) database.Picture {
 		Where("rating <> 0").
 		Order("RANDOM()").
 		First(&opponent)
+
+	return opponent
+}
+
+func (a API) findWorthyOpponent(challenger database.Picture) database.Picture {
+	var (
+		lastWonMatch  database.Match
+		lastLostMatch database.Match
+		opponent      database.Picture
+	)
+
+	a.db.Where("winnerID = ?", challenger.ID).Order("created_at desc").First(&lastWonMatch)
+	a.db.Where("loserID = ?", challenger.ID).Order("created_at desc").First(&lastLostMatch)
+
+	opponentQuery := a.db.Where("rating <> 0").Where("likes >= 0")
+
+	// Never played.
+	if lastWonMatch.ID == 0 && lastLostMatch.ID == 0 {
+		return a.findOpponent(challenger)
+	}
+	// Never won a match.
+	if lastWonMatch.ID == 0 && lastLostMatch.ID != 0 {
+		opponentQuery = opponentQuery.Where("rating < ?", challenger.Rating)
+	}
+	// Never lost a match.
+	if lastLostMatch.ID == 0 && lastWonMatch.ID != 0 {
+		opponentQuery = opponentQuery.Where("? < rating", challenger.Rating)
+	}
+	// Won and lost matches.
+	if lastWonMatch.ID != 0 && lastLostMatch.ID != 0 {
+		// Last match was won.
+		if lastWonMatch.CreatedAt.After(lastLostMatch.CreatedAt) {
+			opponentQuery = opponentQuery.Where("? < rating", challenger.Rating)
+		} else {
+			opponentQuery = opponentQuery.Where("rating < ?", challenger.Rating)
+		}
+	}
+
+	opponentQuery.First(&opponent)
+	if opponent.ID == 0 {
+		return a.findOpponent(challenger)
+	}
 
 	return opponent
 }

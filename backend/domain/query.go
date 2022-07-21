@@ -9,7 +9,9 @@ import (
 )
 
 func (a API) buildQuery(input *model.SearchFilter) *gorm.DB {
-	query := a.db.QueryPictures().Limit(100)
+	query := a.db.QueryPictures().
+		Where("0 <= likes").
+		Limit(100)
 
 	if input == nil {
 		return query
