@@ -54,6 +54,8 @@ enum SortOrder {
   ID
   LIKES_ASC
   LIKES_DESC
+  LOSSES_ASC
+  LOSSES_DESC
   RANDOM
   RATING_ASC
   RATING_DESC
@@ -61,6 +63,8 @@ enum SortOrder {
   UPDATED_AT_DESC
   VIEWS_ASC
   VIEWS_DESC
+  WINS_ASC
+  WINS_DESC
 }
 
 input DeletePath {

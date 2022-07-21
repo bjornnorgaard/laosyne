@@ -137,13 +137,17 @@ export enum SortOrder {
   Id = 'ID',
   LikesAsc = 'LIKES_ASC',
   LikesDesc = 'LIKES_DESC',
+  LossesAsc = 'LOSSES_ASC',
+  LossesDesc = 'LOSSES_DESC',
   Random = 'RANDOM',
   RatingAsc = 'RATING_ASC',
   RatingDesc = 'RATING_DESC',
   UpdatedAtAsc = 'UPDATED_AT_ASC',
   UpdatedAtDesc = 'UPDATED_AT_DESC',
   ViewsAsc = 'VIEWS_ASC',
-  ViewsDesc = 'VIEWS_DESC'
+  ViewsDesc = 'VIEWS_DESC',
+  WinsAsc = 'WINS_ASC',
+  WinsDesc = 'WINS_DESC'
 }
 
 export type PicturePartsFragment = { __typename?: 'Picture', id: number, path: string, ext: string, views: number, likes: number, losses: number, wins: number, rating: number, deviation: number, updatedAt: string, createdAt: string };
@@ -214,14 +218,14 @@ export const PicturePartsFragmentDoc = gql`
     deviation
     updatedAt
     createdAt
-}
+  }
 `;
 export const PictureDetailsDocument = gql`
   query PictureDetails($id: Int!) {
     Picture(pictureId: $id) {
       ...PictureParts
     }
-}
+  }
 ${PicturePartsFragmentDoc}`;
 
 @Injectable({
@@ -234,12 +238,13 @@ export class PictureDetailsGQL extends Apollo.Query<PictureDetailsQuery, Picture
     super(apollo);
   }
 }
+
 export const LikePictureDocument = gql`
   mutation LikePicture($id: Int!) {
     LikePicture(pictureId: $id) {
       ...PictureParts
     }
-}
+  }
 ${PicturePartsFragmentDoc}`;
 
 @Injectable({
@@ -252,12 +257,13 @@ export class LikePictureGQL extends Apollo.Mutation<LikePictureMutation, LikePic
     super(apollo);
   }
 }
+
 export const DislikePictureDocument = gql`
   mutation DislikePicture($id: Int!) {
     DislikePicture(pictureId: $id) {
       ...PictureParts
     }
-}
+  }
 ${PicturePartsFragmentDoc}`;
 
 @Injectable({
@@ -270,12 +276,13 @@ export class DislikePictureGQL extends Apollo.Mutation<DislikePictureMutation, D
     super(apollo);
   }
 }
+
 export const RatePictureDocument = gql`
   mutation RatePicture($id: Int!) {
     AddToRating(pictureId: $id) {
       ...PictureParts
     }
-}
+  }
 ${PicturePartsFragmentDoc}`;
 
 @Injectable({
@@ -288,12 +295,13 @@ export class RatePictureGQL extends Apollo.Mutation<RatePictureMutation, RatePic
     super(apollo);
   }
 }
+
 export const InspectorSearchDocument = gql`
   query InspectorSearch($input: SearchFilter) {
     Pictures(input: $input) {
       id
     }
-}
+  }
 `;
 
 @Injectable({
@@ -306,6 +314,7 @@ export class InspectorSearchGQL extends Apollo.Query<InspectorSearchQuery, Inspe
     super(apollo);
   }
 }
+
 export const CreateMatchDocument = gql`
   query CreateMatch {
     Match {
@@ -316,7 +325,7 @@ export const CreateMatchDocument = gql`
         id
       }
     }
-}
+  }
 `;
 
 @Injectable({
@@ -329,10 +338,11 @@ export class CreateMatchGQL extends Apollo.Query<CreateMatchQuery, CreateMatchQu
     super(apollo);
   }
 }
+
 export const ReportMatchWinnerDocument = gql`
   mutation ReportMatchWinner($winnerId: Int!, $loserId: Int!) {
     ReportMatchResult(input: {winnerId: $winnerId, loserId: $loserId})
-}
+  }
 `;
 
 @Injectable({
@@ -345,10 +355,11 @@ export class ReportMatchWinnerGQL extends Apollo.Mutation<ReportMatchWinnerMutat
     super(apollo);
   }
 }
+
 export const RescanPathsDocument = gql`
   mutation RescanPaths {
     ScanPaths
-}
+  }
 `;
 
 @Injectable({
