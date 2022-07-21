@@ -61,8 +61,8 @@ func (a API) findWorthyOpponent(challenger database.Picture) database.Picture {
 		opponent      database.Picture
 	)
 
-	a.db.Where("winnerID = ?", challenger.ID).Order("created_at desc").First(&lastWonMatch)
-	a.db.Where("loserID = ?", challenger.ID).Order("created_at desc").First(&lastLostMatch)
+	a.db.Where("winner_id = ?", challenger.ID).Order("created_at desc").First(&lastWonMatch)
+	a.db.Where("loser_id = ?", challenger.ID).Order("created_at desc").First(&lastLostMatch)
 
 	opponentQuery := a.db.Where("rating <> 0").Where("likes >= 0")
 
