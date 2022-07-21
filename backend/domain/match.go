@@ -19,6 +19,13 @@ func (a API) Match(_ context.Context, input *model.SearchFilter) (*model.Match, 
 		Order("RANDOM()").
 		First(&challenger)
 
+	if challenger.ID == 0 {
+		a.buildQuery(input).
+			Where("rating <> 0").
+			Order("RANDOM()").
+			First(&challenger)
+	}
+
 	opponent := a.findOpponent(challenger)
 
 	match := &model.Match{
