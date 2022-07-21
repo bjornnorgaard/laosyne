@@ -1,4 +1,10 @@
-<mat-spinner id="loading" *ngIf="loading"></mat-spinner>
+<mat-spinner class="centered" *ngIf="loading"></mat-spinner>
+<div class="centered" *ngIf="empty">
+  <h1>Oh noes!</h1>
+  <h2>No results for your search</h2>
+  <button mat-raised-button color="primary" (click)="resetFormFilter()">RESET FILTER</button>
+</div>
+
 <div class="inspector">
   <mat-card>
     <mat-card-header>

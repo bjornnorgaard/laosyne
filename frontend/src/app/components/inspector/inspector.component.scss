@@ -24,8 +24,11 @@ mat-card-content {
   }
 }
 
-#loading {
+.centered {
   position: fixed;
-  top: 50%;
-  right: 50%;
+  top: 45%;
+  right: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

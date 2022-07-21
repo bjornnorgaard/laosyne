@@ -10,6 +10,7 @@ import { FormControl, FormGroup } from "@angular/forms";
 })
 export class InspectorComponent implements OnInit {
   public loading: boolean = true;
+  public empty: boolean = false;
   public error: any = null;
   public result$: Observable<InspectorSearchQuery> | undefined;
 
@@ -57,6 +58,7 @@ export class InspectorComponent implements OnInit {
       tap(res => this.loading = res.loading),
       tap(res => this.error = res.error),
       map(res => res.data),
+      tap(data => this.empty = data.Pictures?.length === 0),
     );
   }
 

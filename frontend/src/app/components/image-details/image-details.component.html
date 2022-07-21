@@ -1,28 +1,24 @@
 <ng-container *ngIf="picture | async as p">
 
   <ng-container *ngIf="full">
-    <img *ngIf="!isVideo" mat-card-image [src]="api + '/p?id=' + p.id" [alt]="p.path">
-    <video *ngIf="isVideo" [src]="api + '/p?id=' + p.id" autoplay loop [muted]="true"></video>
+    <img *ngIf="!isVideo" [ngClass]="full ? 'full': ''" mat-card-image [src]="api + '/p?id=' + p.id" [alt]="p.path">
+    <video *ngIf="isVideo" [ngClass]="full ? 'full': ''" mat-card-image [src]="api + '/p?id=' + p.id" autoplay loop
+           [muted]="true"></video>
   </ng-container>
 
   <mat-card *ngIf="!full">
 
     <mat-card-header>
-      <!--  Maybe for user who added the pic later?  -->
-      <!--<div mat-card-avatar></div>-->
-
       <mat-card-title style="display: flex; justify-content: space-between">
         <p class="name">{{p.path.split('\\').reverse()[0].split('.')[0].toUpperCase()}}</p>
         <p>{{p.id}}</p>
       </mat-card-title>
-
       <mat-card-subtitle class="path">{{p.path}}</mat-card-subtitle>
     </mat-card-header>
 
     <img *ngIf="!isVideo" mat-card-image [src]="api + '/p?id=' + p.id" [alt]="p.path">
-    <video *ngIf="isVideo" [src]="api + '/p?id=' + p.id" autoplay loop [muted]="true">
+    <video *ngIf="isVideo" mat-card-image [src]="api + '/p?id=' + p.id" autoplay loop [muted]="true"></video>
 
-    </video>
     <mat-card-content id="details-grid">
       <!--  Edit placement in .scss file  -->
       <div id="label-rating">Score</div>
