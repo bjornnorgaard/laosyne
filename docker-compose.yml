@@ -17,6 +17,9 @@ services:
       DB_PORT: 5432
     depends_on:
       - postgres
+    volumes:
+      - C:\src:/src
+      - P:\Lang:/Lang
 
   postgres:
     image: postgres
