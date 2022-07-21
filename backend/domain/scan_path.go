@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,6 +29,7 @@ func (a API) ScanPaths(ctx context.Context) (bool, error) {
 func (a API) scanFolder(ctx context.Context, path string) {
 	//goland:noinspection ALL
 	if runtime.GOOS != "windows" {
+		path = strings.Replace(path, "c:", "", 1)
 		path = strings.Replace(path, "\\", "/", -1)
 	}
 
@@ -58,11 +58,8 @@ func (a API) scanFolder(ctx context.Context, path string) {
 			continue
 		}
 
-		picture := database.Picture{Path: itemPath, Ext: ext}
-		//goland:noinspection ALL
-		if runtime.GOOS != "windows" {
-			picture.Path = fmt.Sprintf("C:%s", strings.Replace(picture.Path, "/", "\\", -1))
-		}
+		picture := database.Picture{Ext: ext}
+		picture.SetPath(itemPath)
 
 		pictures = append(pictures, picture)
 	}
@@ -86,7 +83,7 @@ func (a *API) removeDeletedMedia() {
 		a.db.Offset(offset).Limit(limit).Find(&pics)
 
 		for _, p := range pics {
-			_, err := os.Stat(p.Path)
+			_, err := os.Stat(p.GetPath())
 			if err != nil {
 				picsToDelete = append(picsToDelete, p)
 			}
